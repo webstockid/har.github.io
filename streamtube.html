@@ -1,0 +1,3232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>StreamTube - Custom YouTube Player & Streamer</title>
+	<meta property="og:title" content="StreamTube">
+	<meta property="og:description" content="YouTube Player & Streamer">
+	<meta property="og:image" content="streamtube/logo.png">
+	<meta property="og:url" content="https://webstockid.github.io/streamtube.html">
+	<link rel="apple-touch-icon" sizes="180x180" href="streamtube/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="streamtube/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="streamtube/favicon-16x16.png">
+	<link rel="manifest" href="streamtube/site.webmanifest">
+	
+	<!-- Tailwind CSS CDN -->
+	<script src="https://cdn.tailwindcss.com"></script>
+	
+	<!-- FontAwesome 6 CDN -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	
+	<!-- Google Fonts: 6 Modern Distinct Fonts (Manrope, Sora, DM Sans, Figtree, Onest, Albert Sans) -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700;800&family=Figtree:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Onest:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	
+	<style>
+		/* Dynamic Design Tokens */
+		:root {
+			--accent-color: #5b9bd5;
+			--accent-hover: #4785be;
+			--accent-light: rgba(91, 155, 213, 0.14);
+			--accent-glow: rgba(91, 155, 213, 0.20);
+			--base-font-size: 14px;
+			--app-font-family: 'Manrope', sans-serif;
+			--fw-base: 400;
+			--fw-medium: 500;
+			--fw-semibold: 600;
+			--fw-bold: 700;
+			--player-brightness: 100%;
+			--ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+		}
+
+		html {
+			font-size: var(--base-font-size);
+			scroll-behavior: smooth;
+		}
+
+		body {
+			font-family: var(--app-font-family);
+			font-size: 1rem;
+			font-weight: var(--fw-base);
+			transition: background-color 0.35s var(--ease-smooth), color 0.35s var(--ease-smooth);
+		}
+
+		/* Global Font Family & Dynamic Font Weight Override Across All Text & Numbers (Excluding Icons & Custom Font Preview Items) */
+		body *:not(.fa-solid):not(.fa-regular):not(.fa-brands):not(.fas):not(.far):not(.fab):not(.fa):not(i):not(.font-sample-preview),
+		input, select, option, textarea, button:not(.font-sample-preview), svg text, svg tspan {
+			font-family: var(--app-font-family) !important;
+		}
+
+		.font-mono {
+			font-family: var(--app-font-family) !important;
+			font-variant-numeric: tabular-nums;
+		}
+
+		/* Dynamic Weight Propagation Across All Text & Numerals */
+		html, body, p, span:not(.weight-sample-preview), div, a, li, label, input, select, option, textarea, button, td, th, svg text, svg tspan {
+			font-weight: var(--fw-base);
+		}
+		.font-normal { font-weight: var(--fw-base) !important; }
+		.font-medium { font-weight: var(--fw-medium) !important; }
+		.font-semibold { font-weight: var(--fw-semibold) !important; }
+		.font-bold, strong, b, h1, h2, h3, h4, h5, h6 { font-weight: var(--fw-bold) !important; }
+
+		/* Responsive Rem-Based Text Utilities so 10px-22px Scales Everything Cleanly */
+		.text-\[9px\], .text-\[9\.5px\] { font-size: 0.68rem !important; }
+		.text-\[10px\] { font-size: 0.72rem !important; }
+		.text-\[11px\] { font-size: 0.78rem !important; }
+		.text-xs { font-size: 0.85rem !important; line-height: 1.45 !important; }
+		.text-\[13px\] { font-size: 0.92rem !important; line-height: 1.55 !important; }
+		.text-sm { font-size: 1rem !important; line-height: 1.5 !important; }
+		.text-base { font-size: 1.12rem !important; line-height: 1.45 !important; }
+		.text-lg { font-size: 1.25rem !important; line-height: 1.4 !important; }
+		.text-xl { font-size: 1.4rem !important; line-height: 1.35 !important; }
+		.text-\[22px\] { font-size: 1.5rem !important; line-height: 1.35 !important; }
+
+		/* Theme Base Styles */
+		body.theme-dark { background-color: #020617; color: #f8fafc; }
+		body.theme-slate { background-color: #0f172a; color: #f8fafc; }
+		body.theme-light { background-color: #f8fafc; color: #0f172a; }
+
+		/* Dynamic Theme Utility Elements (Refined Subtle Shadows) */
+		body.theme-dark .ui-nav { background-color: rgba(2, 6, 23, 0.94); border-color: #1e293b; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28); }
+		body.theme-slate .ui-nav { background-color: rgba(15, 23, 42, 0.94); border-color: #334155; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22); }
+		body.theme-light .ui-nav { background-color: rgba(255, 255, 255, 0.94); border-color: #e2e8f0; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04); }
+
+		body.theme-dark .ui-card { background-color: #0f172a; border-color: #1e293b; color: #f8fafc; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22); }
+		body.theme-slate .ui-card { background-color: #1e293b; border-color: #334155; color: #f8fafc; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18); }
+		body.theme-light .ui-card { background-color: #ffffff; border-color: #e2e8f0; color: #1e293b; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03); }
+
+		body.theme-dark .ui-modal { background-color: #0f172a; border-color: #1e293b; color: #f8fafc; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42); }
+		body.theme-slate .ui-modal { background-color: #1e293b; border-color: #334155; color: #f8fafc; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.36); }
+		body.theme-light .ui-modal { background-color: #ffffff; border-color: #cbd5e1; color: #0f172a; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12); }
+
+		body.theme-dark .ui-input { background-color: #1e293b; border-color: #334155; color: #f8fafc; }
+		body.theme-slate .ui-input { background-color: #334155; border-color: #475569; color: #f8fafc; }
+		body.theme-light .ui-input { background-color: #f1f5f9; border-color: #cbd5e1; color: #0f172a; }
+
+		/* Smooth Input & Textarea Interactions */
+		input, textarea {
+			transition: border-color 0.28s var(--ease-smooth), background-color 0.28s var(--ease-smooth), box-shadow 0.28s var(--ease-smooth), transform 0.22s var(--ease-smooth);
+		}
+		input:focus, textarea:focus {
+			box-shadow: 0 0 0 3px var(--accent-light);
+		}
+
+		/* ==========================================
+		   MODERN CUSTOM DROPDOWN (.st-dropdown)
+		   ========================================== */
+		.st-dropdown {
+			position: relative;
+			width: 100%;
+		}
+		.st-dropdown-trigger {
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 0.625rem;
+			padding: 0.55rem 0.8rem;
+			border-radius: 0.85rem;
+			border-width: 1px;
+			text-align: left;
+			cursor: pointer;
+			transition: border-color 0.25s var(--ease-smooth), background-color 0.25s var(--ease-smooth), box-shadow 0.25s var(--ease-smooth), transform 0.18s var(--ease-smooth);
+		}
+		.st-dropdown-trigger:hover {
+			border-color: var(--accent-color);
+		}
+		.st-dropdown.is-open .st-dropdown-trigger {
+			border-color: var(--accent-color);
+			box-shadow: 0 0 0 3px var(--accent-light);
+		}
+		.st-dropdown-chevron {
+			transition: transform 0.28s var(--ease-smooth), color 0.25s var(--ease-smooth);
+		}
+		.st-dropdown.is-open .st-dropdown-chevron {
+			transform: rotate(180deg);
+			color: var(--accent-color);
+		}
+		.st-dropdown-menu {
+			position: absolute;
+			top: calc(100% + 0.4rem);
+			left: 0;
+			right: 0;
+			z-index: 60;
+			border-radius: 1rem;
+			border-width: 1px;
+			padding: 0.35rem;
+			max-height: 15.5rem;
+			overflow-y: auto;
+			backdrop-filter: blur(16px);
+			transform-origin: top center;
+		}
+		body.theme-dark .st-dropdown-menu {
+			background-color: rgba(15, 23, 42, 0.98);
+			border-color: #334155;
+			box-shadow: 0 14px 34px rgba(0, 0, 0, 0.58);
+		}
+		body.theme-slate .st-dropdown-menu {
+			background-color: rgba(30, 41, 59, 0.98);
+			border-color: #475569;
+			box-shadow: 0 14px 34px rgba(0, 0, 0, 0.48);
+		}
+		body.theme-light .st-dropdown-menu {
+			background-color: rgba(255, 255, 255, 0.98);
+			border-color: #cbd5e1;
+			box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14);
+		}
+		.st-dropdown-item {
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 0.5rem;
+			padding: 0.55rem 0.7rem;
+			border-radius: 0.7rem;
+			text-align: left;
+			cursor: pointer;
+			transition: background-color 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth), transform 0.15s var(--ease-smooth);
+		}
+		.st-dropdown-item + .st-dropdown-item {
+			margin-top: 0.15rem;
+		}
+		body.theme-dark .st-dropdown-item:hover { background-color: rgba(255, 255, 255, 0.06); }
+		body.theme-slate .st-dropdown-item:hover { background-color: rgba(255, 255, 255, 0.08); }
+		body.theme-light .st-dropdown-item:hover { background-color: rgba(15, 23, 42, 0.05); }
+
+		.st-dropdown-item.is-selected {
+			background-color: var(--accent-light) !important;
+			color: var(--accent-color) !important;
+		}
+
+		body.theme-dark .ui-sub-bg { background-color: #020617; }
+		body.theme-slate .ui-sub-bg { background-color: #0f172a; }
+		body.theme-light .ui-sub-bg { background-color: #f1f5f9; }
+
+		body.theme-dark .ui-border { border-color: #1e293b; }
+		body.theme-slate .ui-border { border-color: #334155; }
+		body.theme-light .ui-border { border-color: #e2e8f0; }
+
+		body.theme-dark .ui-hover-bg:hover { background-color: rgba(255, 255, 255, 0.08); }
+		body.theme-slate .ui-hover-bg:hover { background-color: rgba(255, 255, 255, 0.1); }
+		body.theme-light .ui-hover-bg:hover { background-color: rgba(15, 23, 42, 0.05); }
+
+		body.theme-dark .ui-text-subtle { color: #94a3b8; }
+		body.theme-slate .ui-text-subtle { color: #94a3b8; }
+		body.theme-light .ui-text-subtle { color: #64748b; }
+
+		/* Softened Glossy Dynamic Accent Button */
+		.btn-accent {
+			background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+			color: #ffffff !important;
+			box-shadow: 0 2px 8px var(--accent-glow);
+			position: relative;
+			overflow: hidden;
+			transition: transform 0.25s var(--ease-smooth), filter 0.25s var(--ease-smooth), box-shadow 0.25s var(--ease-smooth);
+		}
+		.btn-accent > * { position: relative; z-index: 10; }
+		.btn-accent::after {
+			content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%;
+			background: linear-gradient(to bottom, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0));
+			pointer-events: none; border-radius: inherit;
+		}
+		.btn-accent:hover { filter: brightness(1.06); box-shadow: 0 4px 12px var(--accent-glow); }
+		
+		.text-accent { color: var(--accent-color); }
+		.border-accent { border-color: var(--accent-color) !important; }
+		.bg-accent-subtle { background-color: var(--accent-light); }
+
+		/* Softened Glows on Sliders & Switches */
+		input[type="range"] { accent-color: var(--accent-color) !important; }
+		input[type="range"]::-webkit-slider-thumb { background-color: var(--accent-color) !important; box-shadow: 0 0 5px var(--accent-glow); }
+		.eq-slider { -webkit-appearance: slider-vertical; width: 24px; height: 92px; }
+
+		.custom-switch { position: relative; display: inline-block; width: 46px; height: 26px; shrink: 0; }
+		.custom-switch input { opacity: 0; width: 0; height: 0; }
+		.switch-slider {
+			position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+			background-color: #475569; transition: background-color 0.32s var(--ease-smooth), box-shadow 0.32s var(--ease-smooth);
+			border-radius: 26px; border: 1px solid rgba(255,255,255,0.12);
+		}
+		.switch-slider:before {
+			position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px;
+			background-color: white; transition: transform 0.32s var(--ease-smooth); border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+		}
+		input:checked + .switch-slider { background-color: var(--accent-color); box-shadow: 0 0 7px var(--accent-glow); }
+		input:checked + .switch-slider:before { transform: translateX(20px); }
+
+		/* Refined Smooth Animations (Tabs, Modals, Popups, Toasts) */
+		@keyframes modalIn {
+			0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+			100% { opacity: 1; transform: scale(1) translateY(0); }
+		}
+		@keyframes modalOut {
+			0% { opacity: 1; transform: scale(1) translateY(0); }
+			100% { opacity: 0; transform: scale(0.96) translateY(8px); }
+		}
+		@keyframes backdropIn {
+			from { opacity: 0; }
+			to { opacity: 1; }
+		}
+		@keyframes backdropOut {
+			from { opacity: 1; }
+			to { opacity: 0; }
+		}
+		@keyframes tabFadeIn {
+			0% { opacity: 0; transform: translateY(8px) scale(0.99); }
+			100% { opacity: 1; transform: translateY(0) scale(1); }
+		}
+		@keyframes popupIn {
+			0% { opacity: 0; transform: translateY(-6px) scale(0.98); }
+			100% { opacity: 1; transform: translateY(0) scale(1); }
+		}
+		@keyframes popupOut {
+			0% { opacity: 1; transform: translateY(0) scale(1); }
+			100% { opacity: 0; transform: translateY(-4px) scale(0.98); }
+		}
+
+		.modal-anim-in { animation: modalIn 0.32s var(--ease-smooth) forwards; }
+		.modal-anim-out { animation: modalOut 0.22s var(--ease-smooth) forwards; }
+		.backdrop-anim-in { animation: backdropIn 0.28s var(--ease-smooth) forwards; }
+		.backdrop-anim-out { animation: backdropOut 0.22s var(--ease-smooth) forwards; }
+		.tab-anim-in { animation: tabFadeIn 0.34s var(--ease-smooth) forwards; }
+		.popup-anim-in { animation: popupIn 0.24s var(--ease-smooth) forwards; }
+		.popup-anim-out { animation: popupOut 0.18s var(--ease-smooth) forwards; }
+
+		/* Smooth Toast Transition */
+		#toast {
+			transform: translateY(14px) scale(0.96);
+			transition: opacity 0.32s var(--ease-smooth), transform 0.32s var(--ease-smooth);
+			box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24);
+		}
+		#toast.toast-visible {
+			opacity: 1 !important;
+			transform: translateY(0) scale(1);
+		}
+
+		/* Scrollbars & Specific Elements */
+		.no-scrollbar::-webkit-scrollbar { display: none; }
+		.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+		::-webkit-scrollbar { width: 6px; height: 6px; }
+		::-webkit-scrollbar-track { background: transparent; }
+		::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.28); border-radius: 9999px; }
+
+		.aspect-video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; }
+		.aspect-video-container iframe, .aspect-video-container .hero-placeholder {
+			position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+		}
+		#playerWrapper { filter: brightness(var(--player-brightness)); transition: filter 0.25s ease, max-width 0.35s var(--ease-smooth); }
+		.profile-cover-box { background-size: cover; background-position: center; background-repeat: no-repeat; }
+
+		/* Video Description Expandable Without Any Ellipsis or Clipping */
+		#videoDescContent {
+			max-height: 4.8rem;
+			overflow: hidden;
+			position: relative;
+			transition: max-height 0.35s var(--ease-smooth);
+		}
+		#videoDescContent.expanded {
+			max-height: none;
+			overflow: visible;
+		}
+	</style>
+</head>
+<body class="theme-dark min-h-screen flex flex-col justify-between">
+
+	<div>
+		<!-- ==========================================
+		     1. SPACIOUS TOP FIXED NAVIGATION BAR
+		     ========================================== -->
+		<header id="navbar" class="fixed top-0 left-0 right-0 z-40 ui-nav backdrop-blur-md border-b px-3 sm:px-6 py-2.5 sm:py-3 transition-all">
+			<div class="max-w-6xl mx-auto flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 sm:gap-4">
+				
+				<!-- Brand Logo (No Ellipsis / Wrapping Friendly) -->
+				<div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="app.resetHome()">
+					<div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shadow-sm overflow-hidden bg-accent-subtle border ui-border shrink-0">
+						<img src="streamtube/logo.png" alt="StreamTube Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="w-full h-full object-cover">
+						<span class="hidden w-full h-full btn-accent items-center justify-center text-white text-xs"><i class="fa-solid fa-play"></i></span>
+					</div>
+					<span class="font-bold text-sm sm:text-base md:text-lg tracking-tight whitespace-normal break-words leading-tight">Stream <span class="text-accent">Tube</span></span>
+				</div>
+
+				<!-- Search Input -->
+				<div class="order-3 sm:order-2 w-full sm:flex-1 sm:max-w-md md:max-w-xl relative">
+					<form onsubmit="app.handleSearch(event)" class="relative flex items-center" autocomplete="off">
+						<input type="text" id="searchInput" placeholder="Cari video di YouTube..." oninput="app.handleSearchInput(this.value)" onfocus="app.showSearchSuggestions()" onblur="app.hideSearchSuggestions()" class="w-full ui-input text-xs sm:text-sm rounded-full pl-9 sm:pl-10 pr-10 sm:pr-11 py-2 sm:py-2.5 border focus:outline-none focus:border-accent shadow-inner"/>
+						<i class="fa-solid fa-magnifying-glass ui-text-subtle absolute left-3 sm:left-3.5 pointer-events-none text-xs sm:text-sm"></i>
+						<button type="submit" aria-label="Cari" class="absolute right-1.5 p-1.5 rounded-full btn-accent text-white hover:scale-105 transition-transform flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7">
+							<i class="fa-solid fa-arrow-right text-[10px] sm:text-xs"></i>
+						</button>
+					</form>
+					<!-- Search Suggestions -->
+					<div id="searchSuggestions" class="absolute top-full left-0 right-0 mt-1.5 ui-modal border rounded-2xl py-2 hidden z-50 overflow-hidden text-xs">
+						<div class="px-3.5 py-1.5 flex flex-wrap items-center justify-between gap-2 text-[11px] ui-text-subtle border-b ui-border mb-1">
+							<span class="font-semibold flex items-center gap-1.5 break-words"><i class="fa-solid fa-clock-rotate-left text-accent"></i> Riwayat Pencarian</span>
+							<button type="button" onmousedown="app.clearSearchHistory(event)" class="hover:text-rose-400 transition-colors text-[10px] whitespace-normal"><i class="fa-solid fa-trash-can mr-1"></i>Hapus Semua</button>
+						</div>
+						<div id="suggestionList" class="max-h-56 overflow-y-auto"></div>
+					</div>
+				</div>
+
+				<!-- Account & Settings Buttons (Full Text Visible Without Ellipsis) -->
+				<div class="order-2 sm:order-3 flex items-center gap-2 shrink-0">
+					<button onclick="app.openModal('accountModal')" class="flex items-center gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-full ui-card border text-xs sm:text-sm font-medium hover:border-accent transition-all">
+						<img id="navAvatarImg" src="https://placehold.co/100x100/5b9bd5/ffffff?text=U" alt="Profile" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover shrink-0">
+						<span class="hidden md:inline max-w-[160px] whitespace-normal break-words text-left leading-tight" id="navAccountName">Akun</span>
+					</button>
+					<button onclick="app.openModal('settingsModal')" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full ui-card border flex items-center justify-center hover:border-accent transition-all shrink-0" title="Pengaturan">
+						<i class="fa-solid fa-sliders text-xs sm:text-sm"></i>
+					</button>
+				</div>
+			</div>
+		</header>
+
+		<!-- Main Content -->
+		<main class="pt-28 sm:pt-20 max-w-6xl mx-auto px-0 sm:px-4 pb-28">
+
+			<!-- ==========================================
+			     2A. STICKY VIDEO PLAYER CONTAINER ONLY
+			     ========================================== -->
+			<section id="stickyVideoContainer" class="sticky top-28 sm:top-16 z-30 ui-sub-bg pt-0 sm:pt-1 pb-1 sm:pb-2 transition-all duration-300">
+				<div id="playerWrapper" class="w-full mx-auto transition-all duration-300">
+					<div class="w-full bg-black shadow-lg border-b sm:border ui-border aspect-video-container relative sm:rounded-2xl sm:overflow-hidden">
+						<div id="heroPlaceholder" class="hero-placeholder flex flex-col items-center justify-center p-4 sm:p-6 text-center bg-gradient-to-br from-slate-900 via-slate-950 to-black text-slate-200 relative overflow-hidden">
+							<img id="heroBgThumb" src="" alt="" class="absolute inset-0 w-full h-full object-cover opacity-20 blur-sm hidden">
+							<div class="relative z-10 flex flex-col items-center">
+								<div class="w-14 h-14 sm:w-20 sm:h-20 rounded-full btn-accent flex items-center justify-center shadow-md mb-3 sm:mb-4 group cursor-pointer hover:scale-105 transition-transform" onclick="app.playFirstAvailable()">
+									<i class="fa-solid fa-play text-lg sm:text-2xl text-white ml-1"></i>
+								</div>
+								<h3 id="heroTitle" class="text-sm sm:text-xl font-bold tracking-tight mb-1 max-w-lg px-2 break-words">Selamat Datang di StreamTube</h3>
+								<p id="heroSub" class="text-xs sm:text-sm text-slate-400 max-w-md px-2 break-words">Pilih salah satu video dari daftar di bawah atau klik tombol untuk memutar video.</p>
+							</div>
+						</div>
+						<!-- Real YouTube Player -->
+						<iframe 
+							id="ytPlayer" class="hidden" src="" title="YouTube Video Streamer" 
+							frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+						</iframe>
+					</div>
+				</div>
+			</section>
+
+			<!-- ==========================================
+			     2B. COMPLETE VIDEO INFORMATION CARD (NO ELLIPSIS)
+			     ========================================== -->
+			<section id="videoMeta" class="w-full mt-2 sm:mt-3 px-3 sm:px-0">
+				<div class="ui-card border rounded-2xl p-4 sm:p-5 space-y-4 transition-all">
+					
+					<!-- Judul Video -->
+					<div>
+						<h1 id="videoTitle" class="font-bold text-base sm:text-xl md:text-[22px] leading-snug tracking-tight break-words whitespace-normal">
+							Siap memutar video
+						</h1>
+					</div>
+
+					<!-- Kartu Pengunggah (Channel) + Tombol Aksi Utama -->
+					<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 pt-2 border-t ui-border">
+						
+						<!-- Identitas Pengunggah & Tanggal Upload -->
+						<div class="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+							<img id="channelAvatar" src="https://placehold.co/100x100/1e293b/ffffff?text=C" alt="Channel Avatar" class="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover shadow-sm border-2 border-accent/40 shrink-0">
+							<div class="min-w-0 flex-1">
+								<div class="flex flex-wrap items-center gap-1.5">
+									<span id="channelName" class="font-bold text-sm sm:text-base break-words whitespace-normal">Channel YouTube</span>
+									<i class="fa-solid fa-circle-check text-sky-400 text-xs shrink-0" title="Terverifikasi"></i>
+								</div>
+								<div class="text-xs ui-text-subtle mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+									<span id="metaDate" class="break-words">-</span>
+									<span class="opacity-50">•</span>
+									<span class="inline-flex items-center gap-1 break-words">
+										<i class="fa-solid fa-users text-[10px] text-accent shrink-0"></i>
+										<span id="channelSubs" class="break-words">100K Subscriber</span>
+									</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Baris Tombol Aksi (Suka, Unduh MP4, Unduh MP3, Bagikan) -->
+						<div class="flex flex-wrap items-center gap-2">
+							<button id="btnLike" onclick="app.toggleLike()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl ui-sub-bg border ui-border text-xs font-semibold hover:border-rose-500/60 transition-all">
+								<i class="fa-solid fa-thumbs-up text-xs" id="iconLike"></i>
+								<span>Suka</span>
+								<span id="countLikeBtn" class="px-1.5 py-0.5 rounded-md bg-black/20 font-mono text-[11px]">0</span>
+							</button>
+
+							<button onclick="app.downloadAction('mp4')" class="flex items-center gap-2 px-3.5 py-2 rounded-xl btn-accent text-xs font-semibold transition-all">
+								<i class="fa-solid fa-film text-xs"></i>
+								<span>Unduh MP4</span>
+							</button>
+
+							<button onclick="app.downloadAction('mp3')" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition-all">
+								<i class="fa-solid fa-music text-xs"></i>
+								<span>Unduh MP3</span>
+							</button>
+
+							<button onclick="app.shareCurrentVideo()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl ui-sub-bg border ui-border text-xs font-semibold hover:border-accent transition-all">
+								<i class="fa-solid fa-share-nodes text-xs text-accent"></i>
+								<span>Bagikan</span>
+							</button>
+						</div>
+					</div>
+
+					<!-- Pil Statistik Ringkas Video (Kali Dilihat, Total Like, Komentar, Durasi) -->
+					<div id="videoStatsBar" class="flex flex-wrap items-center gap-2">
+						<div class="ui-sub-bg border ui-border rounded-full px-3 py-1 inline-flex items-center gap-1.5 text-xs" title="Kali Dilihat">
+							<i class="fa-solid fa-eye text-blue-400 text-[11px] shrink-0"></i>
+							<span class="font-semibold break-words" id="metaViews">0</span>
+						</div>
+
+						<div class="ui-sub-bg border ui-border rounded-full px-3 py-1 inline-flex items-center gap-1.5 text-xs" title="Total Like">
+							<i class="fa-solid fa-heart text-rose-400 text-[11px] shrink-0"></i>
+							<span class="font-semibold break-words" id="metaLikes">0</span>
+						</div>
+
+						<div class="ui-sub-bg border ui-border rounded-full px-3 py-1 inline-flex items-center gap-1.5 text-xs" title="Komentar">
+							<i class="fa-solid fa-comments text-indigo-400 text-[11px] shrink-0"></i>
+							<span class="font-semibold break-words" id="metaComments">0</span>
+						</div>
+
+						<div class="ui-sub-bg border ui-border rounded-full px-3 py-1 inline-flex items-center gap-1.5 text-xs" title="Durasi">
+							<i class="fa-solid fa-clock text-emerald-400 text-[11px] shrink-0"></i>
+							<span class="font-semibold font-mono break-words" id="metaDuration">--:--</span>
+						</div>
+					</div>
+
+					<!-- Kotak Deskripsi Video Utuh (Tanpa Pemotongan / Ellipsis) -->
+					<div class="ui-sub-bg border ui-border rounded-xl p-3.5 sm:p-4 space-y-2.5">
+						<div class="flex flex-wrap items-center justify-between gap-2">
+							<span class="font-semibold text-xs flex items-center gap-1.5">
+								<i class="fa-solid fa-align-left text-accent"></i>
+								<span>Deskripsi Video</span>
+							</span>
+							<button type="button" onclick="app.copyDescription()" class="text-[11px] ui-text-subtle hover:text-accent transition-colors flex items-center gap-1">
+								<i class="fa-regular fa-copy"></i>
+								<span>Salin Teks</span>
+							</button>
+						</div>
+
+						<div id="videoDescContent" class="ui-text-subtle leading-relaxed whitespace-pre-line break-words text-xs sm:text-[13px]">
+							Pilih video dari rekomendasi untuk menampilkan informasi lengkap dan deskripsi.
+						</div>
+
+						<div class="pt-1.5 border-t ui-border flex items-center justify-between">
+							<button type="button" id="toggleDescBtn" onclick="app.toggleDescription()" class="inline-flex items-center gap-1.5 font-bold text-xs text-accent hover:underline transition-all py-0.5">
+								<span>Tampilkan Semua</span>
+								<i class="fa-solid fa-chevron-down text-[10px]"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- ==========================================
+			     2C. CATEGORY PILLS BAR (FLEX WRAP / NO ELLIPSIS)
+			     ========================================== -->
+			<section id="categoryMeta" class="w-full max-w-6xl mx-auto mt-3 sm:mt-4 px-3 sm:px-0">
+				<div class="flex items-center gap-1.5 sm:gap-2">
+					<button type="button" id="categoryPrevBtn" onclick="app.scrollCategories(-1)" aria-label="Geser kategori ke kiri" class="hidden sm:flex w-8 h-8 rounded-full ui-card border items-center justify-center shrink-0 hover:border-accent transition-all active:scale-95">
+						<i class="fa-solid fa-chevron-left text-[11px]"></i>
+					</button>
+					<div class="relative flex flex-nowrap items-center gap-1.5 sm:gap-2 py-1 text-xs flex-1 min-w-0 overflow-x-auto no-scrollbar select-none" id="categoryContainer"></div>
+					<button type="button" id="categoryNextBtn" onclick="app.scrollCategories(1)" aria-label="Geser kategori ke kanan" class="hidden sm:flex w-8 h-8 rounded-full ui-card border items-center justify-center shrink-0 hover:border-accent transition-all active:scale-95">
+						<i class="fa-solid fa-chevron-right text-[11px]"></i>
+					</button>
+				</div>
+			</section>
+
+			<!-- ==========================================
+			     3. RECOMMENDATIONS GRID
+			     ========================================== -->
+			<section class="mt-3 sm:mt-5 px-3 sm:px-0">
+				<div class="flex flex-wrap items-center justify-between gap-2 mb-3 sm:mb-4 px-1">
+					<h2 id="sectionTitle" class="text-sm sm:text-lg font-semibold flex items-center gap-2 break-words"><i class="fa-solid fa-wand-magic-sparkles text-accent"></i> Rekomendasi Video</h2>
+					<span id="resultCount" class="text-xs ui-text-subtle"></span>
+				</div>
+				<div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"></div>
+			</section>
+		</main>
+	</div>
+
+	<!-- ==========================================
+	     4. FLOATING FIXED BOTTOM PLAYER CONTROL BAR
+	     ========================================== -->
+	<div id="bottomPlayerBar" class="fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 ui-card border rounded-3xl sm:rounded-full shadow-lg px-3 sm:px-6 py-2 sm:py-2.5 flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-4 gap-y-1.5 transition-all duration-500 backdrop-blur-xl w-[96vw] max-w-3xl">
+		<!-- Transport Group -->
+		<div class="flex items-center justify-center gap-1 sm:gap-2 grow">
+			<!-- Prev Video -->
+			<button onclick="app.playPrevVideo()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full ui-hover-bg flex items-center justify-center hover:text-accent transition-all hover:scale-105 active:scale-95 shrink-0" title="Video Sebelumnya">
+				<i class="fa-solid fa-backward-step text-xs sm:text-sm"></i>
+			</button>
+
+			<!-- Exact Rewind 10s -->
+			<button onclick="app.seekRelative(-10)" class="px-2 sm:px-2.5 h-8 sm:h-9 rounded-full ui-hover-bg flex items-center justify-center hover:text-accent transition-all hover:scale-105 active:scale-95 text-xs font-mono font-bold shrink-0 whitespace-nowrap" title="Mundur 10 Detik">
+				<i class="fa-solid fa-rotate-left text-[11px] mr-1"></i>10s
+			</button>
+
+			<!-- Play / Pause -->
+			<button onclick="app.togglePlayPause()" id="btnBottomPlay" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full btn-accent flex items-center justify-center text-white shadow-sm hover:scale-105 active:scale-95 transition-all shrink-0" title="Play / Pause">
+				<i class="fa-solid fa-play text-sm sm:text-base ml-0.5" id="bottomPlayIcon"></i>
+			</button>
+
+			<!-- Exact Forward 10s -->
+			<button onclick="app.seekRelative(10)" class="px-2 sm:px-2.5 h-8 sm:h-9 rounded-full ui-hover-bg flex items-center justify-center hover:text-accent transition-all hover:scale-105 active:scale-95 text-xs font-mono font-bold shrink-0 whitespace-nowrap" title="Maju 10 Detik">
+				10s<i class="fa-solid fa-rotate-right text-[11px] ml-1"></i>
+			</button>
+
+			<!-- Next Video -->
+			<button onclick="app.playNextVideo()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full ui-hover-bg flex items-center justify-center hover:text-accent transition-all hover:scale-105 active:scale-95 shrink-0" title="Video Selanjutnya">
+				<i class="fa-solid fa-forward-step text-xs sm:text-sm"></i>
+			</button>
+		</div>
+
+		<div class="hidden md:block h-6 w-[1px] bg-slate-700/40"></div>
+
+		<!-- Mode Group -->
+		<div class="flex items-center justify-center gap-1.5 sm:gap-2 grow">
+			<!-- Repeat Mode -->
+			<button onclick="app.toggleRepeatMode()" id="btnBottomRepeat" class="px-2.5 sm:px-3 py-1.5 rounded-full ui-hover-bg flex items-center gap-1.5 hover:text-accent transition-all text-xs font-medium shrink-0 whitespace-nowrap" title="Mode Pengulangan">
+				<i class="fa-solid fa-repeat text-xs sm:text-sm" id="repeatIcon"></i>
+				<span id="repeatBadge" class="font-mono text-center inline-block min-w-[2.2rem] text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-slate-800 border border-slate-700">Off</span>
+			</button>
+
+			<!-- Autoplay Toggle -->
+			<button onclick="app.toggleAutoplayMode()" id="btnBottomAutoplay" class="px-2.5 sm:px-3 py-1.5 rounded-full bg-indigo-600 text-white flex items-center gap-1.5 text-xs font-medium shadow-sm transition-all hover:brightness-110 shrink-0 whitespace-nowrap" title="Auto Play Berikutnya">
+				<i class="fa-solid fa-circle-play text-xs sm:text-sm" id="autoplayIcon"></i>
+				<span id="autoplayBadge" class="font-mono text-center inline-block min-w-[2.2rem] text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-indigo-950/60 border border-indigo-400/30">ON</span>
+			</button>
+		</div>
+	</div>
+
+	<!-- ==========================================
+	     5. MODAL: PROFILE & ACCOUNT (NO ELLIPSIS)
+	     ========================================== -->
+	<div id="accountModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm hidden">
+		<div class="ui-modal border rounded-3xl w-full max-w-xl overflow-hidden flex flex-col max-h-[92vh]">
+
+			<!-- Header -->
+			<div class="flex items-center justify-between px-5 py-3.5 border-b ui-border">
+				<h3 class="font-bold flex items-center gap-2 text-sm sm:text-base break-words"><i class="fa-solid fa-circle-user text-accent"></i> Profil Akun</h3>
+				<button type="button" onclick="app.closeModal('accountModal')" class="w-8 h-8 rounded-xl ui-text-subtle ui-hover-bg flex items-center justify-center transition-colors shrink-0"><i class="fa-solid fa-xmark text-base"></i></button>
+			</div>
+
+			<div class="p-4 overflow-y-auto space-y-3 text-xs sm:text-sm">
+
+				<!-- Cover, Avatar & Identity -->
+				<div class="ui-sub-bg border ui-border rounded-2xl overflow-hidden">
+					<div id="profileCoverBox" class="w-full h-24 sm:h-32 profile-cover-box relative p-2.5 flex items-start justify-end" style="background-image: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #020617 100%);">
+						<div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 pointer-events-none"></div>
+						<button type="button" onclick="document.getElementById('coverFileInput').click()" class="relative z-30 bg-black/60 hover:bg-black/80 text-white text-[11px] font-medium px-2.5 py-1.5 rounded-full backdrop-blur-md border border-white/20 flex items-center gap-1.5 transition-all cursor-pointer active:scale-95" title="Unggah Foto Sampul">
+							<i class="fa-solid fa-camera text-[11px] text-accent"></i>
+							<span>Ubah Sampul</span>
+						</button>
+					</div>
+
+					<div class="px-4 pb-4 relative z-20 flex items-end gap-3 -mt-8">
+						<button type="button" onclick="document.getElementById('avatarFileInput').click()" class="relative shrink-0 rounded-full" title="Ubah Foto Profil">
+							<img id="profileAvatar" src="https://placehold.co/100x100/5b9bd5/ffffff?text=U" alt="Avatar" class="rounded-full object-cover border-4 border-slate-900 shadow-md bg-slate-900" style="width: 4.25rem; height: 4.25rem;">
+							<span class="absolute bottom-0 right-0 w-6 h-6 rounded-full btn-accent flex items-center justify-center border-2 border-slate-900">
+								<i class="fa-solid fa-camera text-[10px]"></i>
+							</span>
+						</button>
+						<div class="flex-1 min-w-0 pb-0.5">
+							<div id="accNameDisplay" class="flex flex-wrap items-center gap-1.5">
+								<span id="accName" class="font-bold text-base sm:text-lg break-words whitespace-normal leading-tight">Pengguna StreamTube</span>
+								<button type="button" onclick="app.editName()" class="p-1.5 rounded-lg ui-text-subtle hover:text-accent ui-hover-bg transition-colors shrink-0" title="Edit Nama">
+									<i class="fa-solid fa-pen-to-square text-xs"></i>
+								</button>
+							</div>
+							<!-- Inline Name Editor -->
+							<div id="accNameEditForm" class="hidden flex-wrap items-center gap-1.5 mt-1">
+								<input type="text" id="accNameInput" maxlength="32" class="ui-input border rounded-lg px-2.5 py-1 text-xs font-medium focus:outline-none focus:border-accent w-40 sm:w-48" placeholder="Nama baru...">
+								<button type="button" onclick="app.saveEditedName()" class="px-2.5 py-1 rounded-lg btn-accent text-xs font-semibold">Simpan</button>
+								<button type="button" onclick="app.cancelEditName()" class="px-2.5 py-1 rounded-lg ui-card border text-xs">Batal</button>
+							</div>
+							<div class="flex items-center gap-1.5 mt-0.5 ui-text-subtle">
+								<i class="fa-regular fa-calendar text-[10px]"></i>
+								<span id="accAge" class="text-xs break-words">Umur Akun: 0 Hari</span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Hidden File Inputs -->
+				<input type="file" id="avatarFileInput" class="hidden" accept="image/*" onchange="app.handleAvatarUpload(event)">
+				<input type="file" id="coverFileInput" class="hidden" accept="image/*" onchange="app.handleCoverUpload(event)">
+
+				<!-- Quick Stats -->
+				<div class="ui-sub-bg border ui-border rounded-2xl grid grid-cols-4 py-3 text-center">
+					<div class="px-1">
+						<div class="font-bold text-accent text-sm sm:text-base break-words" id="statWatch">0</div>
+						<div class="text-[10px] ui-text-subtle break-words">Tontonan</div>
+					</div>
+					<div class="px-1 border-l ui-border">
+						<div class="font-bold text-rose-500 text-sm sm:text-base break-words" id="statLike">0</div>
+						<div class="text-[10px] ui-text-subtle break-words">Disukai</div>
+					</div>
+					<div class="px-1 border-l ui-border">
+						<div class="font-bold text-teal-500 text-sm sm:text-base break-words" id="statDownload">0</div>
+						<div class="text-[10px] ui-text-subtle break-words">Unduhan</div>
+					</div>
+					<div class="px-1 border-l ui-border">
+						<div class="font-bold text-amber-500 text-sm sm:text-base break-words" id="statDays">0d</div>
+						<div class="text-[10px] ui-text-subtle break-words">Aktif</div>
+					</div>
+				</div>
+
+				<!-- 7-DAY WATCH STATISTICS GRAPH -->
+				<div class="p-3.5 ui-sub-bg border ui-border rounded-2xl space-y-2">
+					<div class="flex flex-wrap items-center justify-between gap-2">
+						<div>
+							<h4 class="font-bold text-xs sm:text-sm flex items-center gap-1.5 break-words">
+								<i class="fa-solid fa-chart-column text-accent"></i>
+								<span>Grafik Tontonan (7 Hari Terakhir)</span>
+							</h4>
+							<p class="text-[10px] ui-text-subtle mt-0.5 break-words">Statistik jumlah video yang diputar setiap hari</p>
+						</div>
+						<span id="chartTodaySummary" class="px-2.5 py-1 rounded-full bg-accent-subtle text-accent text-[11px] font-bold font-mono">Hari ini: 0 video</span>
+					</div>
+					<div id="watchStatsChartContainer" class="w-full h-48 sm:h-56 pt-1"></div>
+				</div>
+
+				<!-- Segmented Tab Navigation -->
+				<div class="flex p-1 gap-1 ui-sub-bg border ui-border rounded-2xl text-xs">
+					<button type="button" onclick="app.switchAccTab('watch')" id="tabWatch" class="flex-1 py-2 px-3 rounded-xl btn-accent font-semibold flex items-center justify-center gap-1.5 transition-all">
+						Riwayat (<span id="countWatch">0</span>)
+					</button>
+					<button type="button" onclick="app.switchAccTab('like')" id="tabLike" class="flex-1 py-2 px-3 rounded-xl ui-text-subtle font-medium flex items-center justify-center gap-1.5 transition-all hover:text-accent">
+						Disukai (<span id="countLike">0</span>)
+					</button>
+					<button type="button" onclick="app.switchAccTab('download')" id="tabDownload" class="flex-1 py-2 px-3 rounded-xl ui-text-subtle font-medium flex items-center justify-center gap-1.5 transition-all hover:text-accent">
+						Unduhan (<span id="countDownload">0</span>)
+					</button>
+				</div>
+				<!-- Tab List Content -->
+				<div id="accList" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
+			</div>
+
+			<!-- Export/Import Actions -->
+			<div class="px-4 py-3 border-t ui-border flex gap-2">
+				<button type="button" onclick="app.exportHistory()" class="flex-1 px-3.5 py-2 text-xs font-medium rounded-xl ui-card border hover:border-accent flex items-center justify-center gap-1.5 transition-all">
+					<i class="fa-solid fa-file-export text-accent"></i> Ekspor JSON
+				</button>
+				<button type="button" onclick="app.triggerImport()" class="flex-1 px-3.5 py-2 text-xs font-medium rounded-xl ui-card border hover:border-accent flex items-center justify-center gap-1.5 transition-all">
+					<i class="fa-solid fa-file-import text-accent"></i> Impor JSON
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- ==========================================
+	     6. MODAL: SETTINGS (CUSTOM MODERN DROPDOWNS)
+	     ========================================== -->
+	<div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm hidden">
+		<div class="ui-modal border rounded-3xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
+			
+			<!-- Modern Header -->
+			<div class="px-5 py-4 border-b ui-border flex items-center justify-between gap-3">
+				<div class="flex items-center gap-3 min-w-0">
+					<div class="w-10 h-10 rounded-2xl bg-accent-subtle text-accent flex items-center justify-center border border-accent/25 shrink-0">
+						<i class="fa-solid fa-sliders text-base"></i>
+					</div>
+					<div class="min-w-0">
+						<h3 class="font-bold text-sm sm:text-base tracking-tight break-words">Pengaturan Sistem</h3>
+						<p class="text-[11px] ui-text-subtle break-words">Kustomisasi tema, tipografi, audio equalizer & sistem</p>
+					</div>
+				</div>
+				<button type="button" onclick="app.closeModal('settingsModal')" class="w-9 h-9 rounded-xl ui-sub-bg border ui-border ui-text-subtle hover:text-accent flex items-center justify-center transition-colors shrink-0">
+					<i class="fa-solid fa-xmark text-base"></i>
+				</button>
+			</div>
+
+			<!-- Quick Category Filter Pills (Flex Wrap so Nothing Overflows or Truncates) -->
+			<div class="px-5 py-2.5 border-b ui-border ui-sub-bg flex flex-wrap items-center gap-1.5 text-xs">
+				<button type="button" onclick="app.filterSettingsSection('all', this)" class="settings-nav-pill px-3 py-1.5 rounded-full btn-accent font-semibold transition-all">Semua</button>
+				<button type="button" onclick="app.filterSettingsSection('appearance', this)" class="settings-nav-pill px-3 py-1.5 rounded-full ui-card border font-medium hover:border-accent transition-all">Tampilan</button>
+				<button type="button" onclick="app.filterSettingsSection('typography', this)" class="settings-nav-pill px-3 py-1.5 rounded-full ui-card border font-medium hover:border-accent transition-all">Tipografi</button>
+				<button type="button" onclick="app.filterSettingsSection('audio', this)" class="settings-nav-pill px-3 py-1.5 rounded-full ui-card border font-medium hover:border-accent transition-all">Audio & Media</button>
+				<button type="button" onclick="app.filterSettingsSection('system', this)" class="settings-nav-pill px-3 py-1.5 rounded-full ui-card border font-medium hover:border-accent transition-all">Sistem</button>
+			</div>
+
+			<!-- Settings Body -->
+			<div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs sm:text-sm" id="settingsModalBody">
+				
+				<!-- Module 1: Mode Tema & Aksen -->
+				<div data-settings-group="appearance" class="settings-module p-4 ui-sub-bg border ui-border rounded-2xl space-y-4">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-2.5">
+							<span class="w-7 h-7 rounded-lg bg-accent-subtle text-accent flex items-center justify-center shrink-0"><i class="fa-solid fa-palette text-xs"></i></span>
+							<div>
+								<h4 class="font-bold text-xs sm:text-sm break-words">Mode Tema & Warna Aksen</h4>
+								<p class="text-[10px] ui-text-subtle break-words">Pilih suasana latar dan warna sorotan antarmuka</p>
+							</div>
+						</div>
+					</div>
+
+					<!-- Visual Theme Cards -->
+					<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+						<button type="button" onclick="app.setTheme('dark')" id="btnThemeDark" class="p-2.5 border rounded-2xl text-left transition-all ui-card hover:border-accent flex flex-col gap-2">
+							<div class="w-full h-8 rounded-lg bg-[#020617] border border-slate-800 p-1.5 flex items-center gap-1">
+								<span class="w-2 h-2 rounded-full bg-blue-500"></span>
+								<span class="w-8 h-1.5 rounded bg-slate-800"></span>
+							</div>
+							<div class="flex items-center justify-between w-full">
+								<span class="font-semibold text-xs">Dark</span>
+								<i class="fa-solid fa-moon text-[10px] text-indigo-400"></i>
+							</div>
+						</button>
+
+						<button type="button" onclick="app.setTheme('slate')" id="btnThemeSlate" class="p-2.5 border rounded-2xl text-left transition-all ui-card hover:border-accent flex flex-col gap-2">
+							<div class="w-full h-8 rounded-lg bg-[#0f172a] border border-slate-700 p-1.5 flex items-center gap-1">
+								<span class="w-2 h-2 rounded-full bg-sky-400"></span>
+								<span class="w-8 h-1.5 rounded bg-slate-700"></span>
+							</div>
+							<div class="flex items-center justify-between w-full">
+								<span class="font-semibold text-xs">Slate</span>
+								<i class="fa-solid fa-cloud-moon text-[10px] text-sky-400"></i>
+							</div>
+						</button>
+
+						<button type="button" onclick="app.setTheme('light')" id="btnThemeLight" class="p-2.5 border rounded-2xl text-left transition-all ui-card hover:border-accent flex flex-col gap-2">
+							<div class="w-full h-8 rounded-lg bg-[#f8fafc] border border-slate-200 p-1.5 flex items-center gap-1">
+								<span class="w-2 h-2 rounded-full bg-blue-500"></span>
+								<span class="w-8 h-1.5 rounded bg-slate-300"></span>
+							</div>
+							<div class="flex items-center justify-between w-full">
+								<span class="font-semibold text-xs">Light</span>
+								<i class="fa-solid fa-sun text-[10px] text-amber-500"></i>
+							</div>
+						</button>
+					</div>
+
+					<!-- Circular Accent Palette (Bulat Penuh) -->
+					<div class="space-y-2 pt-2 border-t ui-border">
+						<div class="flex flex-wrap items-center justify-between gap-2">
+							<span class="text-[11px] font-medium ui-text-subtle">Warna Aksen Utama</span>
+							<span class="text-[10px] font-mono text-accent uppercase" id="accentHexLabel">#5B9BD5</span>
+						</div>
+						<div class="flex flex-wrap items-center justify-between sm:justify-start gap-2.5 sm:gap-3.5" id="accentColorPalette">
+							<button type="button" onclick="app.updateAccentColor('#e06c75')" data-color="#e06c75" class="accent-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full aspect-square bg-[#e06c75] shadow-sm hover:scale-105 transition-all border-2 border-white/25 flex items-center justify-center shrink-0" title="Merah Kalem"></button>
+							<button type="button" onclick="app.updateAccentColor('#e5c07b')" data-color="#e5c07b" class="accent-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full aspect-square bg-[#e5c07b] shadow-sm hover:scale-105 transition-all border-2 border-white/25 flex items-center justify-center shrink-0" title="Kuning Kalem"></button>
+							<button type="button" onclick="app.updateAccentColor('#68b984')" data-color="#68b984" class="accent-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full aspect-square bg-[#68b984] shadow-sm hover:scale-105 transition-all border-2 border-white/25 flex items-center justify-center shrink-0" title="Hijau Kalem"></button>
+							<button type="button" onclick="app.updateAccentColor('#5b9bd5')" data-color="#5b9bd5" class="accent-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full aspect-square bg-[#5b9bd5] shadow-sm hover:scale-105 transition-all border-2 border-white/25 flex items-center justify-center shrink-0" title="Biru Kalem"></button>
+							<button type="button" onclick="app.updateAccentColor('#9b7ede')" data-color="#9b7ede" class="accent-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full aspect-square bg-[#9b7ede] shadow-sm hover:scale-105 transition-all border-2 border-white/25 flex items-center justify-center shrink-0" title="Ungu Kalem"></button>
+							<button type="button" onclick="app.updateAccentColor('#e08e55')" data-color="#e08e55" class="accent-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full aspect-square bg-[#e08e55] shadow-sm hover:scale-105 transition-all border-2 border-white/25 flex items-center justify-center shrink-0" title="Oren Kalem"></button>
+							<label class="accent-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full aspect-square bg-gradient-to-br from-rose-400 via-emerald-400 to-indigo-400 shadow-sm hover:scale-105 transition-all border-2 border-white/25 flex items-center justify-center cursor-pointer shrink-0" title="Warna Kustom">
+								<i class="fa-solid fa-eye-dropper text-white text-xs"></i>
+								<input type="color" onchange="app.updateAccentColor(this.value)" id="accentColorInput" class="hidden">
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<!-- Module 2: Tipografi (10px-22px, Global Weight, 6 New Fonts dengan Custom Modern Dropdown) -->
+				<div data-settings-group="typography" class="settings-module p-4 ui-sub-bg border ui-border rounded-2xl space-y-4">
+					<div class="flex items-center gap-2.5">
+						<span class="w-7 h-7 rounded-lg bg-accent-subtle text-accent flex items-center justify-center shrink-0"><i class="fa-solid fa-font text-xs"></i></span>
+						<div>
+							<h4 class="font-bold text-xs sm:text-sm break-words">Tipografi & Keterbacaan</h4>
+							<p class="text-[10px] ui-text-subtle break-words">Berlaku untuk seluruh teks & angka di aplikasi</p>
+						</div>
+					</div>
+
+					<!-- Live Typography Preview Box (No Ellipsis) -->
+					<div class="ui-card border rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+						<div class="min-w-0 flex-1">
+							<div class="text-[10px] uppercase tracking-wider text-accent font-semibold">Pratinjau Huruf & Angka</div>
+							<div class="font-bold text-sm break-words mt-0.5">StreamTube HD 123.456 • 2026</div>
+							<div class="text-xs ui-text-subtle break-words">Teks & angka otomatis menyesuaikan jenis, ukuran, dan ketebalan.</div>
+						</div>
+						<span class="px-2.5 py-1 rounded-lg bg-accent-subtle text-accent font-mono text-xs font-bold shrink-0" id="fontSizeVal">14px</span>
+					</div>
+					
+					<div>
+						<div class="flex justify-between items-center mb-1.5">
+							<label class="font-medium text-xs">Skala Ukuran Font</label>
+							<span class="text-[10px] ui-text-subtle">10px — 22px</span>
+						</div>
+						<div class="flex items-center gap-3">
+							<span class="text-[11px] font-bold ui-text-subtle">10</span>
+							<input type="range" id="fontSizeSlider" min="10" max="22" value="14" step="1" oninput="app.updateFontSize(this.value)" class="w-full cursor-pointer">
+							<span class="text-sm font-bold ui-text-subtle">22</span>
+						</div>
+					</div>
+					
+					<!-- Custom Modern Dropdowns: Jenis Font & Ketebalan Font -->
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+						<!-- Jenis Font Dropdown -->
+						<div>
+							<label class="block font-medium text-[11px] ui-text-subtle mb-1.5">Jenis Font (6 Pilihan Modern)</label>
+							<div class="st-dropdown" id="fontFamilyDropdown">
+								<button type="button" onclick="app.toggleDropdown('fontFamilyDropdown', event)" aria-haspopup="listbox" aria-expanded="false" class="st-dropdown-trigger ui-card border">
+									<div class="flex items-center gap-2.5 min-w-0 flex-1">
+										<span class="w-7 h-7 rounded-lg bg-accent-subtle text-accent flex items-center justify-center text-[11px] font-bold shrink-0">Aa</span>
+										<div class="min-w-0 flex-1">
+											<div id="fontFamilyDropdownLabel" class="font-semibold text-xs break-words leading-tight">Manrope</div>
+											<div id="fontFamilyDropdownSub" class="text-[10px] ui-text-subtle break-words leading-tight">Modern Geometric • Default</div>
+										</div>
+									</div>
+									<i class="fa-solid fa-chevron-down text-[11px] ui-text-subtle st-dropdown-chevron shrink-0"></i>
+								</button>
+								<div id="fontFamilyDropdownMenu" role="listbox" class="st-dropdown-menu hidden"></div>
+							</div>
+						</div>
+
+						<!-- Ketebalan Font Dropdown -->
+						<div>
+							<label class="block font-medium text-[11px] ui-text-subtle mb-1.5">Ketebalan Font</label>
+							<div class="st-dropdown" id="fontWeightDropdown">
+								<button type="button" onclick="app.toggleDropdown('fontWeightDropdown', event)" aria-haspopup="listbox" aria-expanded="false" class="st-dropdown-trigger ui-card border">
+									<div class="flex items-center gap-2.5 min-w-0 flex-1">
+										<span class="w-7 h-7 rounded-lg bg-accent-subtle text-accent flex items-center justify-center text-[11px] font-bold shrink-0">
+											<i class="fa-solid fa-bold text-[10px]"></i>
+										</span>
+										<div class="min-w-0 flex-1">
+											<div id="fontWeightDropdownLabel" class="font-semibold text-xs break-words leading-tight">Normal (400)</div>
+											<div id="fontWeightDropdownSub" class="text-[10px] ui-text-subtle break-words leading-tight">Bobot Standar Seimbang</div>
+										</div>
+									</div>
+									<i class="fa-solid fa-chevron-down text-[11px] ui-text-subtle st-dropdown-chevron shrink-0"></i>
+								</button>
+								<div id="fontWeightDropdownMenu" role="listbox" class="st-dropdown-menu hidden"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Module 3: Kontrol Media & Audio Equalizer -->
+				<div data-settings-group="audio" class="settings-module p-4 ui-sub-bg border ui-border rounded-2xl space-y-4">
+					<div class="flex items-center gap-2.5">
+						<span class="w-7 h-7 rounded-lg bg-accent-subtle text-accent flex items-center justify-center shrink-0"><i class="fa-solid fa-headphones text-xs"></i></span>
+						<div>
+							<h4 class="font-bold text-xs sm:text-sm break-words">Kontrol Media & Audio Equalizer</h4>
+							<p class="text-[10px] ui-text-subtle break-words">Volume pemutar, kecerahan layar & 5-Band EQ</p>
+						</div>
+					</div>
+					
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+						<div class="ui-card border rounded-xl p-3 space-y-2">
+							<div class="flex justify-between items-center gap-2">
+								<span class="font-medium text-xs flex items-center gap-1.5"><i class="fa-solid fa-volume-high text-accent"></i> Volume</span>
+								<span id="volumeVal" class="font-mono text-accent text-xs font-bold">100%</span>
+							</div>
+							<input type="range" id="volumeSlider" min="0" max="100" value="100" oninput="app.setVolume(this.value)" class="w-full cursor-pointer">
+						</div>
+						<div class="ui-card border rounded-xl p-3 space-y-2">
+							<div class="flex justify-between items-center gap-2">
+								<span class="font-medium text-xs flex items-center gap-1.5"><i class="fa-solid fa-sun text-amber-400"></i> Brightness</span>
+								<span id="brightnessVal" class="font-mono text-accent text-xs font-bold">100%</span>
+							</div>
+							<input type="range" id="brightnessSlider" min="50" max="150" value="100" oninput="app.setBrightness(this.value)" class="w-full cursor-pointer">
+						</div>
+					</div>
+
+					<!-- Output Audio Mode -->
+					<div class="space-y-1.5">
+						<span class="text-[11px] font-medium ui-text-subtle">Mode Output Audio</span>
+						<div class="grid grid-cols-3 gap-2">
+							<button type="button" onclick="app.setAudioMode('stereo')" id="btnAudioStereo" class="p-2 border rounded-xl text-center text-xs font-semibold ui-card transition-all">Stereo</button>
+							<button type="button" onclick="app.setAudioMode('mono')" id="btnAudioMono" class="p-2 border rounded-xl text-center text-xs font-semibold ui-card transition-all">Mono</button>
+							<button type="button" onclick="app.setAudioMode('dolby')" id="btnAudioDolby" class="p-2 border rounded-xl text-center text-xs font-semibold ui-card transition-all">Dolby 3D</button>
+						</div>
+					</div>
+
+					<!-- 5 Band Equalizer dengan Custom Modern Dropdown -->
+					<div class="ui-card border rounded-2xl p-3.5 space-y-3">
+						<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+							<span class="font-semibold text-xs flex items-center gap-1.5 shrink-0">
+								<i class="fa-solid fa-wave-square text-accent"></i>
+								<span>Audio Equalizer (5-Band)</span>
+							</span>
+
+							<!-- Custom Modern Dropdown: EQ Preset -->
+							<div class="st-dropdown sm:w-56" id="eqPresetDropdown">
+								<button type="button" onclick="app.toggleDropdown('eqPresetDropdown', event)" aria-haspopup="listbox" aria-expanded="false" class="st-dropdown-trigger ui-sub-bg border ui-border py-1.5 px-2.5">
+									<div class="flex items-center gap-2 min-w-0 flex-1">
+										<span class="w-6 h-6 rounded-lg bg-accent-subtle text-accent flex items-center justify-center text-[10px] shrink-0">
+											<i class="fa-solid fa-sliders"></i>
+										</span>
+										<div class="min-w-0 flex-1">
+											<div id="eqPresetDropdownLabel" class="font-semibold text-xs break-words leading-tight">Flat</div>
+											<div id="eqPresetDropdownSub" class="text-[9.5px] ui-text-subtle break-words leading-tight">0dB • Netral</div>
+										</div>
+									</div>
+									<i class="fa-solid fa-chevron-down text-[10px] ui-text-subtle st-dropdown-chevron shrink-0"></i>
+								</button>
+								<div id="eqPresetDropdownMenu" role="listbox" class="st-dropdown-menu hidden"></div>
+							</div>
+						</div>
+
+						<div class="grid grid-cols-5 gap-1.5 sm:gap-2 text-center pt-1">
+							<div class="flex flex-col items-center ui-sub-bg rounded-xl py-2 px-1 border ui-border">
+								<input type="range" min="-12" max="12" value="0" oninput="app.updateEqBand(0, this.value)" class="eq-slider">
+								<span class="text-[10px] ui-text-subtle mt-1.5 font-medium break-words">60Hz</span>
+								<span id="eqVal0" class="text-[9px] font-mono text-accent font-bold break-words">0dB</span>
+							</div>
+							<div class="flex flex-col items-center ui-sub-bg rounded-xl py-2 px-1 border ui-border">
+								<input type="range" min="-12" max="12" value="0" oninput="app.updateEqBand(1, this.value)" class="eq-slider">
+								<span class="text-[10px] ui-text-subtle mt-1.5 font-medium break-words">230Hz</span>
+								<span id="eqVal1" class="text-[9px] font-mono text-accent font-bold break-words">0dB</span>
+							</div>
+							<div class="flex flex-col items-center ui-sub-bg rounded-xl py-2 px-1 border ui-border">
+								<input type="range" min="-12" max="12" value="0" oninput="app.updateEqBand(2, this.value)" class="eq-slider">
+								<span class="text-[10px] ui-text-subtle mt-1.5 font-medium break-words">910Hz</span>
+								<span id="eqVal2" class="text-[9px] font-mono text-accent font-bold break-words">0dB</span>
+							</div>
+							<div class="flex flex-col items-center ui-sub-bg rounded-xl py-2 px-1 border ui-border">
+								<input type="range" min="-12" max="12" value="0" oninput="app.updateEqBand(3, this.value)" class="eq-slider">
+								<span class="text-[10px] ui-text-subtle mt-1.5 font-medium break-words">4kHz</span>
+								<span id="eqVal3" class="text-[9px] font-mono text-accent font-bold break-words">0dB</span>
+							</div>
+							<div class="flex flex-col items-center ui-sub-bg rounded-xl py-2 px-1 border ui-border">
+								<input type="range" min="-12" max="12" value="0" oninput="app.updateEqBand(4, this.value)" class="eq-slider">
+								<span class="text-[10px] ui-text-subtle mt-1.5 font-medium break-words">14kHz</span>
+								<span id="eqVal4" class="text-[9px] font-mono text-accent font-bold break-words">0dB</span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Module 4: Umpan Balik System -->
+				<div data-settings-group="system" class="settings-module p-4 ui-sub-bg border ui-border rounded-2xl space-y-3">
+					<div class="flex items-center gap-2.5">
+						<span class="w-7 h-7 rounded-lg bg-accent-subtle text-accent flex items-center justify-center shrink-0"><i class="fa-solid fa-microchip text-xs"></i></span>
+						<div>
+							<h4 class="font-bold text-xs sm:text-sm break-words">Umpan Balik Sistem</h4>
+							<p class="text-[10px] ui-text-subtle break-words">Efek suara interaktif bervariasi di setiap aksi & getaran 100ms</p>
+						</div>
+					</div>
+
+					<div class="divide-y ui-border ui-card border rounded-xl px-3.5">
+						<div class="py-3 flex items-center justify-between gap-3">
+							<div class="flex items-center gap-2.5 min-w-0">
+								<i class="fa-solid fa-volume-high text-accent text-xs w-4 text-center shrink-0"></i>
+								<div class="min-w-0">
+									<div class="font-semibold text-xs break-words">Sound FX Dinamis (Web Audio)</div>
+									<div class="text-[10px] ui-text-subtle break-words">Nada unik berbeda untuk setiap aksi kontrol, navigasi & sistem</div>
+								</div>
+							</div>
+							<label class="custom-switch shrink-0"><input type="checkbox" id="soundToggle" onchange="app.toggleSound(this.checked)"><span class="switch-slider"></span></label>
+						</div>
+
+						<div class="py-3 flex items-center justify-between gap-3">
+							<div class="flex items-center gap-2.5 min-w-0">
+								<i class="fa-solid fa-hand-pointer text-accent text-xs w-4 text-center shrink-0"></i>
+								<div class="min-w-0">
+									<div class="font-semibold text-xs break-words">Getar Haptic 100ms</div>
+									<div class="text-[10px] ui-text-subtle break-words">Durasi getar seragam 100ms di setiap interaksi</div>
+								</div>
+							</div>
+							<label class="custom-switch shrink-0"><input type="checkbox" id="hapticToggle" onchange="app.toggleHaptic(this.checked)"><span class="switch-slider"></span></label>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<!-- Hidden Import File Input -->
+	<input type="file" id="importFileInput" class="hidden" accept=".json" onchange="app.handleImportFile(event)">
+
+	<!-- Toast Message Notification -->
+	<div id="toast" class="fixed bottom-24 right-4 left-4 sm:left-auto z-50 bg-slate-900 text-slate-100 border border-slate-700 px-4 py-2.5 rounded-xl flex items-center gap-2.5 text-xs opacity-0 pointer-events-none max-w-sm ml-auto">
+		<i class="fa-solid fa-circle-info text-accent shrink-0" id="toastIcon"></i>
+		<span id="toastMsg" class="break-words whitespace-normal">Notifikasi</span>
+	</div>
+
+	<!-- ==========================================
+	     TECH STACK FOOTER
+	     ========================================== -->
+	<footer class="ui-card border-t pt-8 pb-6 px-4 text-xs mt-auto">
+		<div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+			<div class="space-y-2">
+				<div class="flex items-center gap-2 font-bold">
+					<img src="streamtube/logo.png" alt="" width="32" height="32" class="h-8 w-8 shrink-0 rounded-xl object-contain">
+					StreamTube
+				</div>
+				<p class="ui-text-subtle leading-relaxed text-[11px] break-words">
+					Proyek demonstrasi pemutar video YouTube kustom, bebas gangguan, dengan antarmuka dinamis dan kontrol presisi tinggi.
+				</p>
+			</div>
+			
+			<!-- Tech Stack Info -->
+			<div>
+				<h4 class="font-semibold mb-2 text-xs">Teknologi & API</h4>
+				<ul class="space-y-1.5 ui-text-subtle text-[11px]">
+					<li class="break-words"><i class="fa-brands fa-js text-yellow-400 w-4"></i> Vanilla JavaScript (ES6+)</li>
+					<li class="break-words"><i class="fa-brands fa-html5 text-orange-500 w-4"></i> HTML5 & LocalStorage</li>
+					<li class="break-words"><i class="fa-brands fa-css3 text-blue-400 w-4"></i> Tailwind CSS (Utility-first)</li>
+					<li class="break-words"><i class="fa-brands fa-youtube text-red-500 w-4"></i> YouTube Iframe API v3</li>
+				</ul>
+			</div>
+
+			<!-- Architecture Info -->
+			<div>
+				<h4 class="font-semibold mb-2 text-xs">Logika & Arsitektur</h4>
+				<ul class="space-y-1.5 ui-text-subtle text-[11px]">
+					<li class="break-words"><i class="fa-solid fa-server text-emerald-400 w-4"></i> Multi-Server Fallback</li>
+					<li class="break-words"><i class="fa-solid fa-microchip text-teal-400 w-4"></i> Real-time Sync & Haptic 100ms</li>
+					<li class="break-words"><i class="fa-solid fa-music text-indigo-400 w-4"></i> Web Audio API (Multi-Tone FX)</li>
+					<li class="break-words"><i class="fa-solid fa-code text-slate-400 w-4"></i> Single-Page App (SPA)</li>
+				</ul>
+			</div>
+		</div>
+		<div class="max-w-6xl mx-auto pt-4 border-t ui-border text-center text-[11px] ui-text-subtle">
+			<p class="break-words">© 2026 StreamTube App. Powered by Custom Player Engine.</p>
+		</div>
+	</footer>
+
+	<!-- ==========================================
+	     7. JAVASCRIPT ENGINE (CLEAN, ROBUST & TAB-INDENTED)
+	     ========================================== -->
+	<script>
+		const app = {
+			apiKey: "AIzaSyCtksa1GE6rBpnuAI4IonvzLYDvPI_5b_E",
+			servers: [
+				{ type: 'yt_official', name: 'YouTube API v3' },
+				{ type: 'piped', baseUrl: 'https://pipedapi.kavin.rocks' }
+			],
+			allowedFonts: [
+				'Manrope',
+				'Sora',
+				'DM Sans',
+				'Figtree',
+				'Onest',
+				'Albert Sans'
+			],
+			fontOptions: [
+				{ value: 'Manrope', label: 'Manrope', desc: 'Modern Geometric • Default' },
+				{ value: 'Sora', label: 'Sora', desc: 'Futuristic Tech Geometric' },
+				{ value: 'DM Sans', label: 'DM Sans', desc: 'Low-Contrast Clean Geometric' },
+				{ value: 'Figtree', label: 'Figtree', desc: 'Friendly Versatile Sans' },
+				{ value: 'Onest', label: 'Onest', desc: 'Neutral Contemporary Grotesque' },
+				{ value: 'Albert Sans', label: 'Albert Sans', desc: 'Elegant Compact Grotesque' }
+			],
+			weightOptions: [
+				{ value: '400', label: 'Normal (400)', desc: 'Bobot Standar Seimbang', badge: '400' },
+				{ value: '500', label: 'Medium (500)', desc: 'Sedikit Lebih Tegas', badge: '500' },
+				{ value: '600', label: 'Semi-Bold (600)', desc: 'Kontras Tinggi & Rapi', badge: '600' },
+				{ value: '700', label: 'Bold (700)', desc: 'Tebal Maksimal & Jelas', badge: '700' }
+			],
+			eqPresetsData: {
+				flat: { label: 'Flat', desc: '0dB • Netral & Alami', icon: 'fa-solid fa-minus', bands: [0, 0, 0, 0, 0] },
+				bass: { label: 'Bass Boost', desc: '+6dB • Dentuman Rendah', icon: 'fa-solid fa-drum', bands: [6, 4, 0, -1, -2] },
+				treble: { label: 'Treble Boost', desc: '+6dB • Detail Vokal & Simbal', icon: 'fa-solid fa-sparkles', bands: [-2, -1, 0, 4, 6] },
+				vocal: { label: 'Vocal Clarity', desc: '+5dB Mid • Dialog Jernih', icon: 'fa-solid fa-microphone-lines', bands: [-2, 2, 5, 2, -1] },
+				rock: { label: 'Rock', desc: 'V-Shape • Dinamis & Bertenaga', icon: 'fa-solid fa-guitar', bands: [5, 3, -1, 3, 5] }
+			},
+			categories: [
+				{ name: "Populer", icon: "fa-solid fa-fire text-amber-500", query: "indonesia viral trending" },
+				{ name: "Musik", icon: "fa-solid fa-music text-pink-500", query: "indonesia musik populer" },
+				{ name: "Gaming", icon: "fa-solid fa-gamepad text-indigo-400", query: "gameplay indonesia trending" },
+				{ name: "Teknologi", icon: "fa-solid fa-laptop text-blue-400", query: "teknologi gadget indonesia" },
+				{ name: "Berita", icon: "fa-solid fa-newspaper text-emerald-400", query: "berita indonesia terkini" },
+				{ name: "Kuliner", icon: "fa-solid fa-utensils text-rose-400", query: "kuliner resep makanan indonesia" },
+				{ name: "Podcast", icon: "fa-solid fa-podcast text-red-400", query: "podcast indonesia populer" },
+				{ name: "Film & Trailer", icon: "fa-solid fa-film text-purple-400", query: "trailer film indonesia terbaru" },
+				{ name: "Olahraga", icon: "fa-solid fa-trophy text-yellow-400", query: "highlight olahraga indonesia" },
+				{ name: "Sepak Bola", icon: "fa-solid fa-futbol text-green-400", query: "highlight sepak bola liga indonesia" },
+				{ name: "Edukasi", icon: "fa-solid fa-graduation-cap text-sky-400", query: "tutorial belajar edukasi indonesia" },
+				{ name: "Komedi", icon: "fa-solid fa-face-laugh-beam text-amber-400", query: "komedi lucu stand up indonesia" },
+				{ name: "Vlog", icon: "fa-solid fa-camera-retro text-fuchsia-400", query: "vlog harian indonesia" },
+				{ name: "Otomotif", icon: "fa-solid fa-car-side text-orange-400", query: "review mobil motor indonesia" },
+				{ name: "Travel", icon: "fa-solid fa-plane-departure text-cyan-400", query: "wisata travel indonesia" },
+				{ name: "Sains", icon: "fa-solid fa-flask text-teal-400", query: "sains fakta unik indonesia" },
+				{ name: "Anime", icon: "fa-solid fa-dragon text-rose-400", query: "anime sub indo" },
+				{ name: "Fashion & Kecantikan", icon: "fa-solid fa-shirt text-pink-400", query: "tutorial makeup fashion indonesia" },
+				{ name: "Kesehatan", icon: "fa-solid fa-heart-pulse text-red-400", query: "tips kesehatan hidup sehat" },
+				{ name: "Bisnis & Keuangan", icon: "fa-solid fa-chart-line text-emerald-400", query: "bisnis investasi keuangan indonesia" },
+				{ name: "DIY & Kerajinan", icon: "fa-solid fa-hammer text-lime-400", query: "diy kerajinan tangan kreatif" },
+				{ name: "Hewan", icon: "fa-solid fa-paw text-amber-500", query: "hewan lucu satwa" },
+				{ name: "Religi", icon: "fa-solid fa-mosque text-green-500", query: "ceramah religi indonesia" },
+				{ name: "Anak-anak", icon: "fa-solid fa-puzzle-piece text-yellow-400", query: "lagu edukasi anak indonesia" },
+				{ name: "Dokumenter", icon: "fa-solid fa-earth-asia text-blue-500", query: "dokumenter indonesia" },
+				{ name: "Live Streaming", icon: "fa-solid fa-tower-broadcast text-red-500", query: "live streaming indonesia" },
+				{ name: "Motivasi", icon: "fa-solid fa-lightbulb text-yellow-300", query: "motivasi inspirasi indonesia" },
+				{ name: "Sejarah", icon: "fa-solid fa-landmark text-stone-400", query: "sejarah indonesia dunia" },
+				{ name: "Horor", icon: "fa-solid fa-ghost text-violet-400", query: "cerita horor misteri indonesia" }
+			],
+
+			activeCategoryIndex: 0,
+			isDescExpanded: false,
+			isTheaterMode: false,
+			isPlaying: false,
+			currentVideoTime: 0,
+			videoDurationLimit: 0,
+			timeTicker: null,
+			scrollTimeout: null,
+			audioCtx: null,
+			audioCompressor: null,
+			audioMasterGain: null,
+			lastSliderSoundTime: 0,
+			openDropdownId: null,
+			
+			repeatMode: 'off', // 'off', 'one', 'all'
+			isAutoplay: true,
+			fetchedVideos: [],
+
+			state: {
+				currentVideo: null,
+				lastWatched: null,
+				user: { name: "Pengguna StreamTube", avatar: null, cover: null, createdAt: Date.now() },
+				history: [],
+				likedList: [],
+				downloads: [],
+				searchHistory: [],
+				likesMap: {},
+				dailyWatchStats: {},
+				settings: { 
+					theme: "dark",
+					fontSize: 14,
+					fontFamily: "Manrope",
+					fontWeight: "400", 
+					accentColor: "#5b9bd5",
+					volume: 100,
+					brightness: 100,
+					audioMode: "stereo", 
+					eqBands: [0, 0, 0, 0, 0],
+					soundEnabled: true,
+					hapticEnabled: true 
+				},
+				activeAccTab: 'watch'
+			},
+
+			init() {
+				this.loadLocalStorage();
+				this.cleanOldStats();
+				this.setupDropdownGlobalListeners();
+				this.applySettingsUI();
+				this.renderCategories();
+				this.setupCategoryScroller();
+				this.setupScrollListener();
+				this.setupIframeMessageListener();
+				
+				if (this.state.lastWatched) this.restoreLastWatched(this.state.lastWatched);
+				this.searchYouTube(this.categories[0].query, false);
+				this.updateBottomBarUI();
+			},
+
+			// ==========================================
+			// MODERN CUSTOM DROPDOWN ENGINE
+			// ==========================================
+			setupDropdownGlobalListeners() {
+				document.addEventListener('click', (e) => {
+					if (this.openDropdownId && !e.target.closest('.st-dropdown')) {
+						this.closeAllDropdowns(true);
+					}
+				});
+
+				document.addEventListener('keydown', (e) => {
+					if (e.key === 'Escape') {
+						if (this.openDropdownId) {
+							e.stopPropagation();
+							this.closeAllDropdowns(true);
+						} else {
+							const settingsModal = document.getElementById('settingsModal');
+							const accountModal = document.getElementById('accountModal');
+							if (settingsModal && !settingsModal.classList.contains('hidden')) {
+								this.closeModal('settingsModal');
+							} else if (accountModal && !accountModal.classList.contains('hidden')) {
+								this.closeModal('accountModal');
+							}
+						}
+					}
+				});
+			},
+
+			toggleDropdown(dropdownId, e) {
+				if (e) e.stopPropagation();
+				this.triggerHaptic();
+				const target = document.getElementById(dropdownId);
+				if (!target) return;
+
+				const isCurrentlyOpen = target.classList.contains('is-open');
+				this.closeAllDropdowns(false);
+
+				if (!isCurrentlyOpen) {
+					const menu = target.querySelector('.st-dropdown-menu');
+					const trigger = target.querySelector('.st-dropdown-trigger');
+					target.classList.add('is-open');
+					if (trigger) trigger.setAttribute('aria-expanded', 'true');
+					if (menu) {
+						menu.classList.remove('hidden', 'popup-anim-out');
+						menu.classList.add('popup-anim-in');
+						setTimeout(() => {
+							menu.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+						}, 40);
+					}
+					this.openDropdownId = dropdownId;
+					this.playSound('dropdown_open');
+				} else {
+					this.playSound('dropdown_close');
+				}
+			},
+
+			closeAllDropdowns(withSound = false) {
+				if (!this.openDropdownId) return;
+				document.querySelectorAll('.st-dropdown.is-open').forEach(dd => {
+					dd.classList.remove('is-open');
+					const trigger = dd.querySelector('.st-dropdown-trigger');
+					const menu = dd.querySelector('.st-dropdown-menu');
+					if (trigger) trigger.setAttribute('aria-expanded', 'false');
+					if (menu && !menu.classList.contains('hidden')) {
+						menu.classList.remove('popup-anim-in');
+						menu.classList.add('popup-anim-out');
+						setTimeout(() => {
+							menu.classList.add('hidden');
+							menu.classList.remove('popup-anim-out');
+						}, 160);
+					}
+				});
+				this.openDropdownId = null;
+				if (withSound) this.playSound('dropdown_close');
+			},
+
+			renderFontFamilyDropdown(selectedFont) {
+				const menu = document.getElementById('fontFamilyDropdownMenu');
+				const labelEl = document.getElementById('fontFamilyDropdownLabel');
+				const subEl = document.getElementById('fontFamilyDropdownSub');
+				if (!menu) return;
+
+				const currentOpt = this.fontOptions.find(o => o.value === selectedFont) || this.fontOptions[0];
+				if (labelEl) {
+					labelEl.innerText = currentOpt.label;
+					labelEl.style.fontFamily = `'${currentOpt.value}', sans-serif`;
+				}
+				if (subEl) subEl.innerText = currentOpt.desc;
+
+				menu.innerHTML = '';
+				this.fontOptions.forEach(opt => {
+					const isSelected = opt.value === currentOpt.value;
+					const item = document.createElement('button');
+					item.type = 'button';
+					item.setAttribute('role', 'option');
+					item.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+					item.className = `st-dropdown-item ${isSelected ? 'is-selected' : ''}`;
+					item.onclick = (e) => {
+						e.stopPropagation();
+						this.closeAllDropdowns(false);
+						this.updateFontFamily(opt.value, true);
+					};
+					item.innerHTML = `
+						<div class="min-w-0 flex-1">
+							<div class="font-sample-preview text-xs font-semibold break-words leading-snug" style="font-family: '${opt.value}', sans-serif !important;">${opt.label}</div>
+							<div class="text-[10px] ui-text-subtle break-words leading-tight mt-0.5">${opt.desc}</div>
+						</div>
+						<div class="flex items-center gap-2 shrink-0">
+							<span class="font-sample-preview text-xs px-2 py-0.5 rounded-md ui-sub-bg border ui-border opacity-85" style="font-family: '${opt.value}', sans-serif !important;">Ag 123</span>
+							${isSelected ? '<i class="fa-solid fa-check text-accent text-xs"></i>' : '<span class="w-3"></span>'}
+						</div>
+					`;
+					menu.appendChild(item);
+				});
+			},
+
+			renderFontWeightDropdown(selectedWeight) {
+				const menu = document.getElementById('fontWeightDropdownMenu');
+				const labelEl = document.getElementById('fontWeightDropdownLabel');
+				const subEl = document.getElementById('fontWeightDropdownSub');
+				if (!menu) return;
+
+				const wStr = String(selectedWeight);
+				const currentOpt = this.weightOptions.find(o => o.value === wStr) || this.weightOptions[0];
+				if (labelEl) labelEl.innerText = currentOpt.label;
+				if (subEl) subEl.innerText = currentOpt.desc;
+
+				menu.innerHTML = '';
+				this.weightOptions.forEach(opt => {
+					const isSelected = opt.value === currentOpt.value;
+					const item = document.createElement('button');
+					item.type = 'button';
+					item.setAttribute('role', 'option');
+					item.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+					item.className = `st-dropdown-item ${isSelected ? 'is-selected' : ''}`;
+					item.onclick = (e) => {
+						e.stopPropagation();
+						this.closeAllDropdowns(false);
+						this.updateFontWeight(opt.value, true);
+					};
+					item.innerHTML = `
+						<div class="min-w-0 flex-1">
+							<div class="text-xs break-words leading-snug">
+								<span class="weight-sample-preview" style="font-weight: ${opt.value} !important;">${opt.label}</span>
+							</div>
+							<div class="text-[10px] ui-text-subtle break-words leading-tight mt-0.5">${opt.desc}</div>
+						</div>
+						<div class="flex items-center gap-2 shrink-0">
+							<span class="weight-sample-preview text-[10px] font-mono px-2 py-0.5 rounded-md ui-sub-bg border ui-border" style="font-weight: ${opt.value} !important;">${opt.badge}</span>
+							${isSelected ? '<i class="fa-solid fa-check text-accent text-xs"></i>' : '<span class="w-3"></span>'}
+						</div>
+					`;
+					menu.appendChild(item);
+				});
+			},
+
+			detectMatchingEqPreset(bands) {
+				if (!Array.isArray(bands) || bands.length !== 5) return 'flat';
+				for (const [key, data] of Object.entries(this.eqPresetsData)) {
+					if (data.bands.every((val, i) => Number(bands[i]) === val)) {
+						return key;
+					}
+				}
+				return 'custom';
+			},
+
+			renderEqPresetDropdown(activeKey) {
+				const menu = document.getElementById('eqPresetDropdownMenu');
+				const labelEl = document.getElementById('eqPresetDropdownLabel');
+				const subEl = document.getElementById('eqPresetDropdownSub');
+				if (!menu) return;
+
+				if (activeKey === 'custom') {
+					if (labelEl) labelEl.innerText = 'Custom';
+					if (subEl) subEl.innerText = 'Penyesuaian Manual 5-Band';
+				} else {
+					const currentData = this.eqPresetsData[activeKey] || this.eqPresetsData.flat;
+					if (labelEl) labelEl.innerText = currentData.label;
+					if (subEl) subEl.innerText = currentData.desc;
+				}
+
+				menu.innerHTML = '';
+				Object.entries(this.eqPresetsData).forEach(([key, data]) => {
+					const isSelected = key === activeKey;
+					const item = document.createElement('button');
+					item.type = 'button';
+					item.setAttribute('role', 'option');
+					item.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+					item.className = `st-dropdown-item ${isSelected ? 'is-selected' : ''}`;
+					item.onclick = (e) => {
+						e.stopPropagation();
+						this.closeAllDropdowns(false);
+						this.setEqPreset(key);
+					};
+					item.innerHTML = `
+						<div class="flex items-center gap-2.5 min-w-0 flex-1">
+							<span class="w-6 h-6 rounded-lg ui-sub-bg border ui-border flex items-center justify-center text-[10px] ${isSelected ? 'text-accent border-accent/40' : 'ui-text-subtle'} shrink-0">
+								<i class="${data.icon}"></i>
+							</span>
+							<div class="min-w-0 flex-1">
+								<div class="text-xs font-semibold break-words leading-snug">${data.label}</div>
+								<div class="text-[10px] ui-text-subtle break-words leading-tight">${data.desc}</div>
+							</div>
+						</div>
+						${isSelected ? '<i class="fa-solid fa-check text-accent text-xs shrink-0"></i>' : '<span class="w-3 shrink-0"></span>'}
+					`;
+					menu.appendChild(item);
+				});
+			},
+
+			cleanOldStats() {
+				const now = new Date();
+				const validDates = [];
+				for (let i = 0; i < 7; i++) {
+					const d = new Date(now);
+					d.setDate(now.getDate() - i);
+					validDates.push(d.toISOString().split('T')[0]);
+				}
+				const cleaned = {};
+				validDates.forEach(dateStr => { cleaned[dateStr] = this.state.dailyWatchStats[dateStr] || 0; });
+				this.state.dailyWatchStats = cleaned;
+				this.saveState();
+			},
+
+			trackWatchStat() {
+				const todayStr = new Date().toISOString().split('T')[0];
+				this.state.dailyWatchStats[todayStr] = (this.state.dailyWatchStats[todayStr] || 0) + 1;
+				this.cleanOldStats();
+			},
+
+			// Real-time YouTube Iframe Synchronization
+			setupIframeMessageListener() {
+				window.addEventListener('message', (event) => {
+					try {
+						let data = event.data;
+						if (typeof data === 'string') data = JSON.parse(data);
+						if (!data || !data.event) return;
+
+						if (data.event === 'onStateChange') {
+							this.handlePlayerStateChange(data.info);
+						} else if (data.event === 'infoDelivery' && data.info) {
+							if (data.info.playerState !== undefined) this.handlePlayerStateChange(data.info.playerState);
+							if (data.info.currentTime !== undefined) this.currentVideoTime = data.info.currentTime;
+							if (data.info.duration !== undefined) this.videoDurationLimit = data.info.duration;
+						}
+					} catch (e) {}
+				});
+			},
+
+			setupScrollListener() {
+				window.addEventListener('scroll', () => {
+					const bBar = document.getElementById('bottomPlayerBar');
+					if (bBar) bBar.classList.add('translate-y-28', 'opacity-0');
+
+					clearTimeout(this.scrollTimeout);
+					this.scrollTimeout = setTimeout(() => {
+						if (bBar) bBar.classList.remove('translate-y-28', 'opacity-0');
+					}, 750);
+				});
+			},
+
+			startTimeTicker() {
+				clearInterval(this.timeTicker);
+				this.timeTicker = setInterval(() => {
+					if (this.isPlaying) this.currentVideoTime += 0.5;
+				}, 500);
+			},
+
+			handlePlayerStateChange(stateCode) {
+				const iframe = document.getElementById('ytPlayer');
+				if (stateCode === 1) { // PLAYING
+					this.isPlaying = true;
+					this.updateBottomBarUI();
+					this.startTimeTicker();
+					if (iframe && iframe.contentWindow) iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
+				} else if (stateCode === 2) { // PAUSED
+					this.isPlaying = false;
+					this.updateBottomBarUI();
+					clearInterval(this.timeTicker);
+				} else if (stateCode === 0) { // ENDED
+					this.isPlaying = false;
+					this.updateBottomBarUI();
+					clearInterval(this.timeTicker);
+
+					setTimeout(() => {
+						if (this.repeatMode === 'one' && this.state.currentVideo) {
+							this.currentVideoTime = 0;
+							if (iframe && iframe.contentWindow) {
+								iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'seekTo', args: [0, true] }), '*');
+								iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+							}
+							this.showToast('Mengulang video (1x)');
+						} else if (this.repeatMode === 'all' || this.isAutoplay) {
+							this.playNextVideo();
+						}
+					}, 300);
+				}
+			},
+
+			// SEEK EXACT REAL-TIME LOGIC (+/- 10s)
+			seekRelative(seconds) {
+				this.triggerHaptic();
+				this.playSound(seconds > 0 ? 'seek_forward' : 'seek_back');
+				const iframe = document.getElementById('ytPlayer');
+				if (!iframe || !this.state.currentVideo) return;
+
+				let newTime = Math.max(0, this.currentVideoTime + seconds);
+				if (this.videoDurationLimit > 0) newTime = Math.min(newTime, this.videoDurationLimit);
+				
+				this.currentVideoTime = newTime;
+
+				iframe.contentWindow.postMessage(JSON.stringify({
+					event: 'command', func: 'seekTo', args: [newTime, true]
+				}), '*');
+
+				this.showToast(`${seconds > 0 ? '+' : ''}${seconds}s (${this.formatSeconds(newTime)})`);
+			},
+
+			togglePlayPause() {
+				this.triggerHaptic();
+				const iframe = document.getElementById('ytPlayer');
+				if (!iframe || !this.state.currentVideo) {
+					if (this.fetchedVideos.length > 0) this.playVideo(this.fetchedVideos[0], 'play');
+					return;
+				}
+				
+				if (this.isPlaying) {
+					this.playSound('pause');
+					iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+					this.isPlaying = false;
+				} else {
+					this.playSound('play');
+					iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
+					this.isPlaying = true;
+				}
+				this.updateBottomBarUI();
+			},
+
+			selectCategory(idx) {
+				this.activeCategoryIndex = idx;
+				this.renderCategories();
+				const cat = this.categories[idx] || this.categories[0];
+				document.getElementById('sectionTitle').innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-accent"></i> Rekomendasi Video`;
+				this.searchYouTube(cat.query, false);
+			},
+
+			renderCategories() {
+				const container = document.getElementById('categoryContainer');
+				const previousScroll = container.scrollLeft;
+				let activeBtn = null;
+				container.innerHTML = '';
+				this.categories.forEach((cat, idx) => {
+					const btn = document.createElement('button');
+					const isActive = idx === this.activeCategoryIndex;
+					if (isActive) activeBtn = btn;
+					btn.className = `px-3.5 py-1.5 rounded-full transition-all text-xs flex items-center gap-1.5 shrink-0 whitespace-nowrap ${isActive ? 'btn-accent text-white font-semibold' : 'ui-card border font-medium hover:border-accent'}`;
+					btn.innerHTML = `<i class="${isActive ? cat.icon.replace(/text-[a-z0-9-]+/g, 'text-white') : cat.icon}"></i> <span class="inline-block ${isActive ? 'text-white opacity-100 visible' : ''}">${cat.name}</span>`;
+					btn.onclick = () => {
+						this.triggerHaptic();
+						this.playSound('category', idx);
+						this.activeCategoryIndex = idx;
+						this.renderCategories();
+						document.getElementById('sectionTitle').innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-accent"></i> Kategori: ${cat.name}`;
+						this.searchYouTube(cat.query);
+					};
+					container.appendChild(btn);
+				});
+
+				container.scrollLeft = previousScroll;
+				if (activeBtn) {
+					const btnLeft = activeBtn.offsetLeft;
+					const btnRight = btnLeft + activeBtn.offsetWidth;
+					if (btnLeft < container.scrollLeft) {
+						container.scrollLeft = Math.max(0, btnLeft - 8);
+					} else if (btnRight > container.scrollLeft + container.clientWidth) {
+						container.scrollLeft = btnRight - container.clientWidth + 8;
+					}
+				}
+				this.updateCategoryArrows();
+			},
+
+			setupCategoryScroller() {
+				const container = document.getElementById('categoryContainer');
+				if (!container) return;
+
+				container.addEventListener('scroll', () => this.updateCategoryArrows(), { passive: true });
+				window.addEventListener('resize', () => this.updateCategoryArrows());
+
+				// Mouse drag-to-scroll (touch devices already swipe natively)
+				let isPressed = false;
+				let hasMoved = false;
+				let startX = 0;
+				let startScroll = 0;
+
+				container.addEventListener('mousedown', (e) => {
+					isPressed = true;
+					hasMoved = false;
+					startX = e.pageX;
+					startScroll = container.scrollLeft;
+				});
+				window.addEventListener('mousemove', (e) => {
+					if (!isPressed) return;
+					const dx = e.pageX - startX;
+					if (Math.abs(dx) > 5) hasMoved = true;
+					if (hasMoved) container.scrollLeft = startScroll - dx;
+				});
+				window.addEventListener('mouseup', () => {
+					isPressed = false;
+				});
+				container.addEventListener('click', (e) => {
+					if (hasMoved) {
+						e.stopPropagation();
+						e.preventDefault();
+						hasMoved = false;
+					}
+				}, true);
+
+				this.updateCategoryArrows();
+			},
+
+			scrollCategories(direction) {
+				const container = document.getElementById('categoryContainer');
+				if (!container) return;
+				this.triggerHaptic();
+				this.playSound('scroll');
+				const amount = Math.max(160, Math.round(container.clientWidth * 0.7)) * direction;
+				container.scrollBy({ left: amount, behavior: 'smooth' });
+			},
+
+			updateCategoryArrows() {
+				const container = document.getElementById('categoryContainer');
+				const prevBtn = document.getElementById('categoryPrevBtn');
+				const nextBtn = document.getElementById('categoryNextBtn');
+				if (!container) return;
+				const maxScroll = container.scrollWidth - container.clientWidth;
+				const noOverflow = maxScroll <= 2;
+				const states = [
+					[prevBtn, noOverflow || container.scrollLeft <= 2],
+					[nextBtn, noOverflow || container.scrollLeft >= maxScroll - 2]
+				];
+				states.forEach(([btn, disabled]) => {
+					if (!btn) return;
+					btn.disabled = disabled;
+					btn.classList.toggle('opacity-30', disabled);
+					btn.classList.toggle('pointer-events-none', disabled);
+				});
+			},
+
+			async searchYouTube(query, autoScroll = true) {
+				const grid = document.getElementById('videoGrid');
+				grid.innerHTML = `<div class="col-span-full py-12 text-center ui-text-subtle text-xs"><i class="fa-solid fa-spinner fa-spin text-2xl text-accent mb-3"></i><p>Mencari video...</p></div>`;
+
+				try {
+					const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=16&type=video&q=${encodeURIComponent(query)}&key=${this.apiKey}`;
+					const res = await fetch(searchUrl);
+					const data = await res.json();
+					const videoIds = data.items.map(i => i.id.videoId).filter(Boolean).join(',');
+					const statsUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${videoIds}&key=${this.apiKey}`;
+					const statsRes = await fetch(statsUrl);
+					const statsData = await statsRes.json();
+
+					this.fetchedVideos = statsData.items.map(item => ({
+						ytId: item.id,
+						title: item.snippet.title,
+						channel: item.snippet.channelTitle,
+						description: item.snippet.description || 'Tidak ada deskripsi tersedia.',
+						views: parseInt(item.statistics?.viewCount || '0'),
+						likes: parseInt(item.statistics?.likeCount || '0'),
+						comments: parseInt(item.statistics?.commentCount || Math.floor(Math.random() * 5000)),
+						date: item.snippet.publishedAt ? item.snippet.publishedAt.split('T')[0] : '-',
+						thumb: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url,
+						durationFormatted: this.parseIsoDuration(item.contentDetails?.duration)
+					}));
+
+					this.renderGrid(this.fetchedVideos);
+					if (autoScroll && window.scrollY > 400) window.scrollTo({ top: 400, behavior: 'smooth' });
+				} catch (e) {
+					grid.innerHTML = `<div class="col-span-full text-center text-rose-400 py-8 text-xs">Gagal memuat video.</div>`;
+				}
+			},
+
+			renderGrid(videos) {
+				const grid = document.getElementById('videoGrid');
+				grid.innerHTML = '';
+				videos.forEach(v => {
+					const card = document.createElement('div');
+					card.className = "ui-card border rounded-xl overflow-hidden cursor-pointer hover:scale-[1.015] transition-all flex flex-col group";
+					card.onclick = () => this.playVideo(v, 'video_select');
+					card.innerHTML = `
+						<div class="relative aspect-video bg-black overflow-hidden">
+							<img src="${v.thumb}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="${v.title.replace(/"/g, '&quot;')}">
+							<div class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] px-2 py-0.5 rounded font-mono flex items-center gap-1 backdrop-blur-md border border-white/10"><i class="fa-solid fa-clock text-[9px]"></i> ${v.durationFormatted}</div>
+						</div>
+						<div class="p-3 flex-1 flex flex-col justify-between gap-2">
+							<h3 class="font-medium text-xs sm:text-sm leading-snug break-words whitespace-normal group-hover:text-accent transition-colors">${v.title}</h3>
+							<div class="text-[11px] ui-text-subtle space-y-1">
+								<p class="font-medium flex items-start gap-1.5 break-words whitespace-normal">
+									<i class="fa-solid fa-circle-user text-[10px] mt-0.5 shrink-0"></i>
+									<span class="break-words">${v.channel}</span>
+								</p>
+								<div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5">
+									<span class="break-words">${this.formatNumber(v.views)}x ditonton</span>
+									<span class="break-words">${v.date}</span>
+								</div>
+							</div>
+						</div>
+					`;
+					grid.appendChild(card);
+				});
+				document.getElementById('resultCount').innerText = `${videos.length} Video`;
+			},
+
+			playFirstAvailable() {
+				if (this.state.currentVideo) this.playVideo(this.state.currentVideo, 'play');
+				else if (this.fetchedVideos.length > 0) this.playVideo(this.fetchedVideos[0], 'play');
+			},
+
+			restoreLastWatched(videoObj) {
+				this.state.currentVideo = videoObj;
+				this.populateVideoMetadataUI(videoObj);
+				
+				const heroTitle = document.getElementById('heroTitle');
+				const heroBgThumb = document.getElementById('heroBgThumb');
+				if (heroTitle) heroTitle.innerText = `Terakhir: ${videoObj.title}`;
+				if (heroBgThumb && videoObj.thumb) {
+					heroBgThumb.src = videoObj.thumb;
+					heroBgThumb.classList.remove('hidden');
+				}
+				this.updateLikeButtonUI();
+			},
+
+			playVideo(videoObj, soundType = 'play') {
+				this.triggerHaptic();
+				if (soundType) this.playSound(soundType);
+				this.state.currentVideo = videoObj;
+				this.state.lastWatched = videoObj;
+				this.currentVideoTime = 0;
+				this.videoDurationLimit = 0;
+				
+				document.getElementById('heroPlaceholder').classList.add('hidden');
+				const iframe = document.getElementById('ytPlayer');
+				iframe.classList.remove('hidden');
+				iframe.src = `https://www.youtube-nocookie.com/embed/${videoObj.ytId}?autoplay=1&enablejsapi=1`;
+
+				this.populateVideoMetadataUI(videoObj);
+				
+				this.isPlaying = true;
+				this.updateBottomBarUI();
+				this.updateLikeButtonUI();
+
+				// Save History
+				const extIdx = this.state.history.findIndex(i => i.ytId === videoObj.ytId);
+				if (extIdx > -1) this.state.history.splice(extIdx, 1);
+				this.state.history.unshift({ ...videoObj, watchedAt: new Date().toLocaleString('id-ID') });
+				
+				this.trackWatchStat();
+				this.saveState();
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+
+				setTimeout(() => {
+					if (iframe.contentWindow) iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
+				}, 1500);
+			},
+
+			playFromList(tab, index) {
+				const list = (tab === 'watch') ? this.state.history : this.state.likedList;
+				if (!list || !list[index]) return;
+				this.playVideo(list[index], 'video_select');
+				this.closeModal('accountModal');
+			},
+
+			populateVideoMetadataUI(videoObj) {
+				document.getElementById('videoTitle').innerText = videoObj.title;
+				document.getElementById('channelName').innerText = videoObj.channel;
+				
+				const subMock = Math.max(10, Math.floor((videoObj.views || 200) / 20));
+				document.getElementById('channelSubs').innerText = `${this.formatNumber(subMock)} Subscriber`;
+				document.getElementById('channelAvatar').src = `https://placehold.co/100x100/1e293b/ffffff?text=${encodeURIComponent(videoObj.channel.charAt(0))}`;
+
+				const isLiked = !!this.state.likesMap[videoObj.ytId];
+				const likesTotal = (videoObj.likes || 0) + (isLiked ? 1 : 0);
+
+				document.getElementById('metaViews').innerText = `${this.formatNumber(videoObj.views || 0)}x`;
+				document.getElementById('metaDate').innerText = videoObj.date || '-';
+				document.getElementById('metaLikes').innerText = this.formatNumber(likesTotal);
+				document.getElementById('metaDuration').innerText = videoObj.durationFormatted || '--:--';
+				document.getElementById('metaComments').innerText = this.formatNumber(videoObj.comments || 0);
+
+				document.getElementById('videoDescContent').innerText = (videoObj.description && videoObj.description.trim())
+					? videoObj.description
+					: 'Deskripsi tidak tersedia untuk video ini.';
+				this.resetDescriptionToggle();
+			},
+
+			playNextVideo() {
+				if (!this.fetchedVideos.length) return;
+				const idx = this.state.currentVideo ? this.fetchedVideos.findIndex(v => v.ytId === this.state.currentVideo.ytId) : -1;
+				this.playVideo(this.fetchedVideos[(idx + 1) % this.fetchedVideos.length], 'next');
+			},
+			
+			playPrevVideo() {
+				if (!this.fetchedVideos.length) return;
+				const idx = this.state.currentVideo ? this.fetchedVideos.findIndex(v => v.ytId === this.state.currentVideo.ytId) : 0;
+				this.playVideo(this.fetchedVideos[(idx - 1 + this.fetchedVideos.length) % this.fetchedVideos.length], 'prev');
+			},
+
+			toggleRepeatMode() {
+				this.triggerHaptic();
+				if (this.repeatMode === 'off') this.repeatMode = 'one';
+				else if (this.repeatMode === 'one') this.repeatMode = 'all';
+				else this.repeatMode = 'off';
+				this.playSound('repeat_' + this.repeatMode);
+				this.updateBottomBarUI();
+				this.showToast(`Mode Pengulangan: ${this.repeatMode.toUpperCase()}`);
+			},
+
+			toggleAutoplayMode() {
+				this.triggerHaptic();
+				this.isAutoplay = !this.isAutoplay;
+				this.playSound(this.isAutoplay ? 'autoplay_on' : 'autoplay_off');
+				this.updateBottomBarUI();
+				this.showToast(`Auto Play: ${this.isAutoplay ? 'ON' : 'OFF'}`);
+			},
+
+			toggleDescription() {
+				this.triggerHaptic();
+				const content = document.getElementById('videoDescContent');
+				const btn = document.getElementById('toggleDescBtn');
+				this.isDescExpanded = !this.isDescExpanded;
+				if (this.isDescExpanded) {
+					this.playSound('expand');
+					content.classList.add('expanded');
+					btn.innerHTML = '<span>Sembunyikan</span><i class="fa-solid fa-chevron-up text-[10px]"></i>';
+				} else {
+					this.playSound('collapse');
+					content.classList.remove('expanded');
+					btn.innerHTML = '<span>Tampilkan Semua</span><i class="fa-solid fa-chevron-down text-[10px]"></i>';
+				}
+			},
+			
+			resetDescriptionToggle() {
+				this.isDescExpanded = false;
+				const content = document.getElementById('videoDescContent');
+				const btn = document.getElementById('toggleDescBtn');
+				if (content) content.classList.remove('expanded');
+				if (btn) btn.innerHTML = '<span>Tampilkan Semua</span><i class="fa-solid fa-chevron-down text-[10px]"></i>';
+			},
+
+			copyDescription() {
+				this.triggerHaptic();
+				this.playSound('copy');
+				const desc = document.getElementById('videoDescContent')?.innerText || '';
+				if (!desc) return;
+				const el = document.createElement('textarea');
+				el.value = desc;
+				document.body.appendChild(el);
+				el.select();
+				document.execCommand('copy');
+				document.body.removeChild(el);
+				this.showToast('Deskripsi video berhasil disalin!');
+			},
+
+			toggleLike() {
+				this.triggerHaptic();
+				if (!this.state.currentVideo) {
+					this.playSound('error');
+					this.showToast('Pilih video terlebih dahulu');
+					return;
+				}
+				const ytId = this.state.currentVideo.ytId;
+				const isLiked = !!this.state.likesMap[ytId];
+				if (isLiked) {
+					this.playSound('unlike');
+					delete this.state.likesMap[ytId];
+					this.state.likedList = this.state.likedList.filter(v => v.ytId !== ytId);
+				} else {
+					this.playSound('like');
+					this.state.likesMap[ytId] = true;
+					this.state.likedList.unshift({ ...this.state.currentVideo, likedAt: new Date().toLocaleString('id-ID') });
+				}
+				this.saveState();
+				this.updateLikeButtonUI();
+			},
+
+			updateLikeButtonUI() {
+				if (!this.state.currentVideo) return;
+				const isLiked = !!this.state.likesMap[this.state.currentVideo.ytId];
+				const btn = document.getElementById('btnLike');
+				const icon = document.getElementById('iconLike');
+				const span = document.getElementById('countLikeBtn');
+				const metaLikes = document.getElementById('metaLikes');
+				
+				let likesCount = this.state.currentVideo.likes || 0;
+				if (isLiked) likesCount++;
+
+				const formattedLikes = this.formatNumber(likesCount);
+				if (span) span.innerText = formattedLikes;
+				if (metaLikes) metaLikes.innerText = formattedLikes;
+				
+				if (isLiked) {
+					btn.className = "flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold shadow-sm transition-all";
+					icon.className = "fa-solid fa-heart text-xs";
+				} else {
+					btn.className = "flex items-center gap-2 px-3.5 py-2 rounded-xl ui-sub-bg border ui-border text-xs font-semibold hover:border-rose-500/60 transition-all";
+					icon.className = "fa-solid fa-thumbs-up text-xs";
+				}
+			},
+
+			toggleTheaterMode() {
+				this.triggerHaptic();
+				this.isTheaterMode = !this.isTheaterMode;
+				this.playSound(this.isTheaterMode ? 'theater_on' : 'theater_off');
+				const wrapper = document.getElementById('playerWrapper');
+				const icon = document.getElementById('theaterIcon');
+				if (this.isTheaterMode) {
+					wrapper.classList.remove('max-w-4xl');
+					wrapper.classList.add('max-w-6xl');
+					if (icon) icon.className = 'fa-solid fa-compress text-xs';
+					this.showToast('Mode Bioskop Aktif');
+				} else {
+					wrapper.classList.remove('max-w-6xl');
+					wrapper.classList.add('max-w-4xl');
+					if (icon) icon.className = 'fa-solid fa-expand text-xs';
+					this.showToast('Mode Bioskop Nonaktif');
+				}
+			},
+
+			shareCurrentVideo() {
+				this.triggerHaptic();
+				if (!this.state.currentVideo) {
+					this.playSound('error');
+					return;
+				}
+				this.playSound('share');
+				const ytUrl = `https://www.youtube.com/watch?v=${this.state.currentVideo.ytId}`;
+				const el = document.createElement('textarea');
+				el.value = ytUrl;
+				document.body.appendChild(el);
+				el.select();
+				document.execCommand('copy');
+				document.body.removeChild(el);
+				this.showToast('Tautan video berhasil disalin!');
+			},
+
+			downloadAction(type) {
+				this.triggerHaptic();
+				if (!this.state.currentVideo) {
+					this.playSound('error');
+					this.showToast('Pilih video terlebih dahulu');
+					return;
+				}
+				this.playSound(type === 'mp3' ? 'download_audio' : 'download');
+				this.state.downloads.unshift({
+					title: this.state.currentVideo.title,
+					type: type.toUpperCase(),
+					ytId: this.state.currentVideo.ytId,
+					thumb: this.state.currentVideo.thumb,
+					downloadedAt: new Date().toLocaleString('id-ID')
+				});
+				this.saveState();
+				window.open(`https://y2mate.is/watch?v=${this.state.currentVideo.ytId}`, '_blank');
+				this.showToast(`Membuka konverter ${type.toUpperCase()}...`);
+			},
+
+			updateBottomBarUI() {
+				const playIcon = document.getElementById('bottomPlayIcon');
+				if (playIcon) playIcon.className = this.isPlaying ? 'fa-solid fa-pause text-sm sm:text-base' : 'fa-solid fa-play text-sm sm:text-base ml-0.5';
+
+				const repeatBadge = document.getElementById('repeatBadge');
+				const repeatBtn = document.getElementById('btnBottomRepeat');
+				if (repeatBadge && repeatBtn) {
+					if (this.repeatMode === 'one') {
+						repeatBadge.innerText = '1x';
+						repeatBadge.className = 'font-mono text-center inline-block min-w-[2.2rem] text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-amber-500/30 text-amber-300 border border-amber-400/50';
+						repeatBtn.className = "px-2.5 sm:px-3 py-1.5 shrink-0 whitespace-nowrap rounded-full bg-amber-600 text-white flex items-center gap-1.5 text-xs shadow-sm transition-all";
+					} else if (this.repeatMode === 'all') {
+						repeatBadge.innerText = 'ALL';
+						repeatBadge.className = 'font-mono text-center inline-block min-w-[2.2rem] text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-teal-500/30 text-teal-300 border border-teal-400/50';
+						repeatBtn.className = "px-2.5 sm:px-3 py-1.5 shrink-0 whitespace-nowrap rounded-full bg-teal-600 text-white flex items-center gap-1.5 text-xs shadow-sm transition-all";
+					} else {
+						repeatBadge.innerText = 'OFF';
+						repeatBadge.className = 'font-mono text-center inline-block min-w-[2.2rem] text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
+						repeatBtn.className = "px-2.5 sm:px-3 py-1.5 shrink-0 whitespace-nowrap rounded-full ui-hover-bg flex items-center gap-1.5 transition-all text-xs";
+					}
+				}
+
+				const autoBadge = document.getElementById('autoplayBadge');
+				const autoBtn = document.getElementById('btnBottomAutoplay');
+				if (autoBadge && autoBtn) {
+					if (this.isAutoplay) {
+						autoBadge.innerText = 'ON';
+						autoBadge.className = 'font-mono text-center inline-block min-w-[2.2rem] text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-950/60 text-indigo-200 border border-indigo-400/30';
+						autoBtn.className = "px-2.5 sm:px-3 py-1.5 shrink-0 whitespace-nowrap rounded-full bg-indigo-600 text-white flex items-center gap-1.5 text-xs shadow-sm transition-all";
+					} else {
+						autoBadge.innerText = 'OFF';
+						autoBadge.className = 'font-mono text-center inline-block min-w-[2.2rem] text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
+						autoBtn.className = "px-2.5 sm:px-3 py-1.5 shrink-0 whitespace-nowrap rounded-full ui-hover-bg flex items-center gap-1.5 transition-all text-xs";
+					}
+				}
+			},
+
+			// SEARCH LOGIC
+			handleSearch(e) {
+				if (e) e.preventDefault();
+				this.triggerHaptic();
+				this.playSound('search');
+				const input = document.getElementById('searchInput');
+				const query = input.value.trim();
+				if (!query) return;
+
+				const existingIdx = this.state.searchHistory.indexOf(query);
+				if (existingIdx > -1) this.state.searchHistory.splice(existingIdx, 1);
+				this.state.searchHistory.unshift(query);
+				if (this.state.searchHistory.length > 15) this.state.searchHistory.pop();
+				this.saveState();
+				
+				this.hideSearchSuggestions();
+				document.getElementById('sectionTitle').innerHTML = `<i class="fa-solid fa-magnifying-glass text-accent mr-1"></i> Hasil: "${query}"`;
+				this.searchYouTube(query);
+			},
+
+			handleSearchInput(val) {
+				this.renderSearchSuggestions(val);
+			},
+
+			showSearchSuggestions() {
+				const popup = document.getElementById('searchSuggestions');
+				popup.classList.remove('hidden', 'popup-anim-out');
+				popup.classList.add('popup-anim-in');
+				this.renderSearchSuggestions(document.getElementById('searchInput').value);
+			},
+
+			hideSearchSuggestions() {
+				const popup = document.getElementById('searchSuggestions');
+				if (!popup || popup.classList.contains('hidden')) return;
+				popup.classList.remove('popup-anim-in');
+				popup.classList.add('popup-anim-out');
+				setTimeout(() => {
+					popup.classList.add('hidden');
+					popup.classList.remove('popup-anim-out');
+				}, 180);
+			},
+			
+			renderSearchSuggestions(filterVal = '') {
+				const container = document.getElementById('suggestionList');
+				container.innerHTML = '';
+				const lowerFilter = filterVal.toLowerCase().trim();
+				const indexed = this.state.searchHistory
+					.map((item, idx) => ({ item, idx }))
+					.filter(entry => entry.item.toLowerCase().includes(lowerFilter));
+
+				if (indexed.length === 0) {
+					container.innerHTML = `<div class="px-4 py-3 text-center text-slate-500 text-[11px]">Belum ada riwayat pencarian.</div>`;
+					return;
+				}
+				indexed.forEach(({ item, idx }) => {
+					const div = document.createElement('div');
+					div.className = "px-3.5 py-2 ui-hover-bg cursor-pointer flex items-center justify-between gap-2 transition-colors";
+					div.onmousedown = () => {
+						document.getElementById('searchInput').value = item;
+						this.handleSearch();
+					};
+					div.innerHTML = `<div class="flex items-start gap-2.5 flex-1 min-w-0"><i class="fa-solid fa-clock-rotate-left ui-text-subtle text-[11px] mt-0.5 shrink-0"></i><span class="break-words whitespace-normal">${item}</span></div>
+									 <button type="button" onmousedown="app.removeSearchHistoryByIndex(event, ${idx})" class="p-1 ui-text-subtle hover:text-rose-400 text-[11px] shrink-0"><i class="fa-solid fa-xmark"></i></button>`;
+					container.appendChild(div);
+				});
+			},
+
+			removeSearchHistoryByIndex(e, index) {
+				e.stopPropagation();
+				e.preventDefault();
+				this.triggerHaptic();
+				this.playSound('delete');
+				if (index >= 0 && index < this.state.searchHistory.length) {
+					this.state.searchHistory.splice(index, 1);
+					this.saveState();
+					this.renderSearchSuggestions(document.getElementById('searchInput').value);
+				}
+			},
+
+			clearSearchHistory(e) {
+				if (e) {
+					e.stopPropagation();
+					e.preventDefault();
+				}
+				this.triggerHaptic();
+				this.playSound('clear_all');
+				this.state.searchHistory = [];
+				this.saveState();
+				this.renderSearchSuggestions('');
+			},
+
+			resetHome() {
+				this.triggerHaptic();
+				this.playSound('home');
+				document.getElementById('searchInput').value = '';
+				this.selectCategory(0);
+			},
+
+			// ==========================================
+			// PROFILE & IMAGE COMPRESSION LOGIC
+			// ==========================================
+			compressImage(file, maxWidth, maxHeight, quality = 0.82) {
+				return new Promise((resolve, reject) => {
+					const reader = new FileReader();
+					reader.onerror = () => reject(new Error('Gagal membaca file gambar'));
+					reader.onload = (event) => {
+						const img = new Image();
+						img.onerror = () => reject(new Error('Format gambar tidak didukung'));
+						img.onload = () => {
+							let width = img.width;
+							let height = img.height;
+
+							if (width > maxWidth || height > maxHeight) {
+								const ratio = Math.min(maxWidth / width, maxHeight / height);
+								width = Math.round(width * ratio);
+								height = Math.round(height * ratio);
+							}
+
+							const canvas = document.createElement('canvas');
+							canvas.width = width;
+							canvas.height = height;
+							const ctx = canvas.getContext('2d');
+							ctx.drawImage(img, 0, 0, width, height);
+
+							const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+							resolve(compressedDataUrl);
+						};
+						img.src = event.target.result;
+					};
+					reader.readAsDataURL(file);
+				});
+			},
+
+			async handleAvatarUpload(e) {
+				const file = e.target.files[0];
+				if (!file) return;
+				try {
+					const compressed = await this.compressImage(file, 320, 320, 0.85);
+					this.state.user.avatar = compressed;
+					this.saveState();
+					this.updateAvatarUI();
+					this.playSound('upload');
+					this.showToast("Foto profil berhasil diperbarui!");
+				} catch (err) {
+					this.playSound('error');
+					this.showToast("Gagal memproses foto profil.");
+				} finally {
+					e.target.value = '';
+				}
+			},
+
+			async handleCoverUpload(e) {
+				const file = e.target.files[0];
+				if (!file) return;
+				try {
+					this.showToast("Mengoptimalkan foto sampul...");
+					const compressed = await this.compressImage(file, 1280, 480, 0.82);
+					this.state.user.cover = compressed;
+					this.saveState();
+					this.updateCoverUI();
+					this.playSound('upload_cover');
+					this.showToast("Foto sampul berhasil diperbarui!");
+				} catch (err) {
+					this.playSound('error');
+					this.showToast("Gagal mengunggah foto sampul.");
+				} finally {
+					e.target.value = '';
+				}
+			},
+
+			updateAvatarUI() {
+				const avatarSrc = this.state.user.avatar || `https://placehold.co/100x100/5b9bd5/ffffff?text=U`;
+				const avatarEl = document.getElementById('profileAvatar');
+				const navAvatarEl = document.getElementById('navAvatarImg');
+				if (avatarEl) avatarEl.src = avatarSrc;
+				if (navAvatarEl) navAvatarEl.src = avatarSrc;
+			},
+
+			updateCoverUI() {
+				const coverBox = document.getElementById('profileCoverBox');
+				if (!coverBox) return;
+				if (this.state.user.cover) {
+					coverBox.style.backgroundImage = `url("${this.state.user.cover}")`;
+				} else {
+					coverBox.style.backgroundImage = `linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #020617 100%)`;
+				}
+			},
+
+			editName() {
+				this.triggerHaptic();
+				this.playSound('edit');
+				const displayRow = document.getElementById('accNameDisplay');
+				const editForm = document.getElementById('accNameEditForm');
+				const input = document.getElementById('accNameInput');
+				if (!displayRow || !editForm || !input) return;
+
+				input.value = this.state.user.name;
+				displayRow.classList.add('hidden');
+				editForm.classList.remove('hidden');
+				editForm.classList.add('flex');
+				input.focus();
+				input.select();
+			},
+
+			saveEditedName() {
+				const input = document.getElementById('accNameInput');
+				const newName = input ? input.value.trim() : '';
+				if (newName) {
+					this.state.user.name = newName;
+					this.saveState();
+					document.getElementById('accName').innerText = this.state.user.name;
+					document.getElementById('navAccountName').innerText = this.state.user.name;
+					this.playSound('save');
+					this.showToast("Nama profil diperbarui!");
+				}
+				this.cancelEditName();
+			},
+
+			cancelEditName() {
+				const displayRow = document.getElementById('accNameDisplay');
+				const editForm = document.getElementById('accNameEditForm');
+				if (displayRow && editForm) {
+					editForm.classList.add('hidden');
+					editForm.classList.remove('flex');
+					displayRow.classList.remove('hidden');
+				}
+			},
+
+			renderAccountModal() {
+				document.getElementById('accName').innerText = this.state.user.name;
+				document.getElementById('navAccountName').innerText = this.state.user.name;
+				this.cancelEditName();
+				this.updateAvatarUI();
+				this.updateCoverUI();
+
+				const diffDays = Math.floor(Math.abs(Date.now() - (this.state.user.createdAt || Date.now())) / (1000 * 60 * 60 * 24));
+				document.getElementById('accAge').innerText = `Umur Akun: ${diffDays} Hari`;
+				
+				document.getElementById('statWatch').innerText = this.state.history.length;
+				document.getElementById('statLike').innerText = this.state.likedList.length;
+				document.getElementById('statDownload').innerText = this.state.downloads.length;
+				document.getElementById('statDays').innerText = `${diffDays}d`;
+
+				document.getElementById('countWatch').innerText = this.state.history.length;
+				document.getElementById('countLike').innerText = this.state.likedList.length;
+				document.getElementById('countDownload').innerText = this.state.downloads.length;
+
+				this.render7DayWatchChart();
+				this.switchAccTab(this.state.activeAccTab, false);
+			},
+
+			// PROPORTIONAL 7-DAY WATCH CHART (FOLLOWS SELECTED FONT & WEIGHT)
+			render7DayWatchChart() {
+				const container = document.getElementById('watchStatsChartContainer');
+				if (!container) return;
+
+				const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+				const now = new Date();
+				const chartData = [];
+
+				for (let i = 6; i >= 0; i--) {
+					const d = new Date(now);
+					d.setDate(now.getDate() - i);
+					const dateStr = d.toISOString().split('T')[0];
+					const shortDate = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+					chartData.push({
+						dateStr,
+						dayName: days[d.getDay()],
+						shortDate,
+						count: this.state.dailyWatchStats[dateStr] || 0
+					});
+				}
+
+				const rawMax = Math.max(...chartData.map(d => d.count), 4);
+				const maxCount = Math.ceil(rawMax / 2) * 2;
+				const midCount = Math.round(maxCount / 2);
+
+				document.getElementById('chartTodaySummary').innerText = `Hari ini: ${chartData[6].count} video`;
+
+				const svgWidth = 420;
+				const svgHeight = 210;
+				const chartTop = 26;
+				const chartBottom = 164;
+				const chartHeight = chartBottom - chartTop;
+				const leftPad = 36;
+				const barWidth = 34;
+				const gap = 18;
+
+				let barsSvg = '';
+				chartData.forEach((d, idx) => {
+					const x = leftPad + idx * (barWidth + gap);
+					const isToday = idx === 6;
+					const barHeight = d.count > 0 ? Math.max(10, Math.round((d.count / maxCount) * chartHeight)) : 6;
+					const y = chartBottom - barHeight;
+					const centerX = x + barWidth / 2;
+
+					barsSvg += `
+						<g>
+							<rect x="${x}" y="${chartTop}" width="${barWidth}" height="${chartHeight}" rx="8" fill="rgba(148, 163, 184, 0.08)" />
+							<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" rx="8" fill="${isToday ? 'url(#todayBarGrad)' : 'rgba(148, 163, 184, 0.42)'}" />
+							<text x="${centerX}" y="${y - 7}" text-anchor="middle" fill="${isToday ? 'var(--accent-color)' : '#94a3b8'}" font-size="11" style="font-weight: var(--fw-bold);">${d.count}</text>
+							<text x="${centerX}" y="${chartBottom + 18}" text-anchor="middle" fill="${isToday ? 'var(--accent-color)' : '#94a3b8'}" font-size="11" style="font-weight: ${isToday ? 'var(--fw-bold)' : 'var(--fw-semibold)'};">${d.dayName}</text>
+							<text x="${centerX}" y="${chartBottom + 32}" text-anchor="middle" fill="#64748b" font-size="9.5" style="font-weight: var(--fw-base);">${d.shortDate}</text>
+						</g>
+					`;
+				});
+
+				container.innerHTML = `
+					<svg width="100%" height="100%" viewBox="0 0 ${svgWidth} ${svgHeight}" class="overflow-visible select-none">
+						<defs>
+							<linearGradient id="todayBarGrad" x1="0" y1="0" x2="0" y2="1">
+								<stop offset="0%" stop-color="var(--accent-color)" stop-opacity="1" />
+								<stop offset="100%" stop-color="var(--accent-hover)" stop-opacity="0.82" />
+							</linearGradient>
+						</defs>
+
+						<line x1="28" y1="${chartTop}" x2="${svgWidth - 8}" y2="${chartTop}" stroke="rgba(148, 163, 184, 0.16)" stroke-dasharray="3,3" />
+						<text x="22" y="${chartTop + 4}" text-anchor="end" fill="#64748b" font-size="9.5" style="font-weight: var(--fw-base);">${maxCount}</text>
+
+						<line x1="28" y1="${chartTop + chartHeight / 2}" x2="${svgWidth - 8}" y2="${chartTop + chartHeight / 2}" stroke="rgba(148, 163, 184, 0.16)" stroke-dasharray="3,3" />
+						<text x="22" y="${chartTop + chartHeight / 2 + 4}" text-anchor="end" fill="#64748b" font-size="9.5" style="font-weight: var(--fw-base);">${midCount}</text>
+
+						<line x1="28" y1="${chartBottom}" x2="${svgWidth - 8}" y2="${chartBottom}" stroke="rgba(148, 163, 184, 0.28)" />
+						<text x="22" y="${chartBottom + 4}" text-anchor="end" fill="#64748b" font-size="9.5" style="font-weight: var(--fw-base);">0</text>
+
+						${barsSvg}
+					</svg>
+				`;
+			},
+
+			switchAccTab(tab, doSound = true) {
+				if (doSound) {
+					this.triggerHaptic();
+					this.playSound('acc_' + tab);
+				}
+				this.state.activeAccTab = tab;
+				['Watch', 'Like', 'Download'].forEach(t => {
+					const el = document.getElementById(`tab${t}`);
+					if (!el) return;
+					if (t.toLowerCase() === tab) el.className = "flex-1 py-2 px-3 rounded-xl btn-accent font-semibold flex items-center justify-center gap-1.5 transition-all";
+					else el.className = "flex-1 py-2 px-3 rounded-xl ui-text-subtle font-medium flex items-center justify-center gap-1.5 transition-all hover:text-accent";
+				});
+
+				const container = document.getElementById('accList');
+				container.innerHTML = '';
+				container.classList.remove('tab-anim-in');
+				void container.offsetWidth;
+				container.classList.add('tab-anim-in');
+
+				const list = (tab === 'watch') ? this.state.history : (tab === 'like') ? this.state.likedList : this.state.downloads;
+				if (list.length === 0) {
+					container.innerHTML = `<div class="text-center text-slate-500 py-6 text-xs">Belum ada riwayat.</div>`;
+					return;
+				}
+
+				list.forEach((item, idx) => {
+					const el = document.createElement('div');
+					el.className = "p-2.5 ui-sub-bg rounded-xl border ui-border flex items-start sm:items-center gap-3 text-xs hover:border-accent transition-all";
+					const thumbUrl = item.thumb || `https://placehold.co/120x68/0f172a/94a3b8?text=Video`;
+					if (tab === 'watch' || tab === 'like') {
+						el.innerHTML = `<img src="${thumbUrl}" class="w-16 h-10 object-cover rounded-lg shrink-0 border ui-border">
+										<div class="min-w-0 flex-1 space-y-0.5">
+											<div class="font-medium break-words whitespace-normal leading-snug">${item.title}</div>
+											<div class="text-[10px] ui-text-subtle break-words whitespace-normal">${item.channel} • ${item.watchedAt || item.likedAt}</div>
+										</div>
+										<button type="button" onclick="app.playFromList('${tab}', ${idx})" class="px-2.5 py-1.5 btn-accent rounded-lg text-[11px] font-medium shrink-0">Putar</button>`;
+					} else {
+						el.innerHTML = `<img src="${thumbUrl}" class="w-16 h-10 object-cover rounded-lg shrink-0 border ui-border">
+										<div class="min-w-0 flex-1 space-y-0.5">
+											<div class="font-medium break-words whitespace-normal leading-snug">${item.title}</div>
+											<div class="text-[10px] ui-text-subtle break-words whitespace-normal">${item.type} • ${item.downloadedAt}</div>
+										</div>
+										<span class="px-2 py-0.5 bg-emerald-950/80 text-emerald-400 rounded font-mono border border-emerald-800/50 shrink-0">Selesai</span>`;
+					}
+					container.appendChild(el);
+				});
+			},
+
+			exportHistory() {
+				this.triggerHaptic();
+				this.playSound('export');
+				const exportData = {
+					user: this.state.user,
+					history: this.state.history,
+					likedList: this.state.likedList,
+					downloads: this.state.downloads,
+					searchHistory: this.state.searchHistory,
+					dailyWatchStats: this.state.dailyWatchStats,
+					settings: this.state.settings,
+					version: "2.4"
+				};
+				const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData));
+				const a = document.createElement('a');
+				a.href = dataStr;
+				a.download = `StreamTube_Backup_${Date.now()}.json`;
+				document.body.appendChild(a);
+				a.click();
+				a.remove();
+				this.showToast("Data akun berhasil diekspor!");
+			},
+
+			triggerImport() {
+				this.triggerHaptic();
+				this.playSound('import');
+				document.getElementById('importFileInput').click();
+			},
+
+			handleImportFile(e) {
+				const file = e.target.files[0];
+				if (!file) return;
+				const reader = new FileReader();
+				reader.onload = (evt) => {
+					try {
+						const imported = JSON.parse(evt.target.result);
+						if (imported.history && imported.user) {
+							this.state.user = imported.user;
+							this.state.history = imported.history || [];
+							this.state.likedList = imported.likedList || [];
+							this.state.downloads = imported.downloads || [];
+							this.state.searchHistory = imported.searchHistory || []; 
+							if (imported.dailyWatchStats) this.state.dailyWatchStats = imported.dailyWatchStats;
+							if (imported.settings) {
+								this.state.settings = Object.assign({}, this.state.settings, imported.settings);
+							}
+							this.saveState();
+							this.applySettingsUI();
+							this.renderAccountModal();
+							this.playSound('import_done');
+							this.showToast("Data akun berhasil diimpor!");
+						} else {
+							this.playSound('error');
+							this.showToast("Format file JSON tidak valid.");
+						}
+					} catch (err) {
+						this.playSound('error');
+						this.showToast("Gagal membaca file JSON.");
+					}
+				};
+				reader.readAsText(file);
+				e.target.value = '';
+			},
+
+			// SETTINGS FILTER TABS WITH SMOOTH ANIMATION
+			filterSettingsSection(group, btnEl) {
+				this.triggerHaptic();
+				this.playSound('tab');
+				this.closeAllDropdowns(false);
+				document.querySelectorAll('.settings-nav-pill').forEach(pill => {
+					pill.className = "settings-nav-pill px-3 py-1.5 rounded-full ui-card border font-medium hover:border-accent transition-all";
+				});
+				if (btnEl) {
+					btnEl.className = "settings-nav-pill px-3 py-1.5 rounded-full btn-accent font-semibold transition-all";
+				}
+				document.querySelectorAll('.settings-module').forEach(mod => {
+					if (group === 'all' || mod.getAttribute('data-settings-group') === group) {
+						mod.classList.remove('hidden', 'tab-anim-in');
+						void mod.offsetWidth;
+						mod.classList.add('tab-anim-in');
+					} else {
+						mod.classList.add('hidden');
+					}
+				});
+			},
+
+			// MODAL CONTROL
+			openModal(id) {
+				this.triggerHaptic();
+				this.playSound(id === 'settingsModal' ? 'settings_open' : 'modal_open');
+				this.closeAllDropdowns(false);
+				const modal = document.getElementById(id);
+				const content = modal.querySelector('.ui-modal');
+				modal.classList.remove('hidden', 'backdrop-anim-out');
+				modal.classList.add('flex', 'backdrop-anim-in');
+				content.classList.remove('modal-anim-out');
+				content.classList.add('modal-anim-in');
+				if (id === 'accountModal') this.renderAccountModal();
+			},
+
+			closeModal(id) {
+				this.triggerHaptic();
+				this.playSound(id === 'settingsModal' ? 'settings_close' : 'modal_close');
+				this.closeAllDropdowns(false);
+				const modal = document.getElementById(id);
+				const content = modal.querySelector('.ui-modal');
+				modal.classList.remove('backdrop-anim-in');
+				modal.classList.add('backdrop-anim-out');
+				content.classList.remove('modal-anim-in');
+				content.classList.add('modal-anim-out');
+				setTimeout(() => {
+					modal.classList.remove('flex', 'backdrop-anim-out');
+					modal.classList.add('hidden');
+				}, 220);
+			},
+
+			// SETTINGS & UI PERSISTENCE
+			loadLocalStorage() {
+				['st_user', 'st_history', 'st_likedList', 'st_downloads', 'st_searchHistory', 'st_settings', 'st_likesMap', 'st_dailyWatchStats', 'st_lastWatched'].forEach(key => {
+					const val = localStorage.getItem(key);
+					if (val) {
+						try {
+							const parsed = JSON.parse(val);
+							const prop = key.replace('st_', '');
+							if (Array.isArray(this.state[prop]) && Array.isArray(parsed)) {
+								this.state[prop] = parsed;
+							} else if (prop === 'lastWatched') {
+								this.state.lastWatched = parsed;
+							} else if (typeof parsed === 'object' && parsed !== null) {
+								this.state[prop] = Object.assign(this.state[prop] || {}, parsed);
+							}
+						} catch (e) {}
+					}
+				});
+			},
+
+			saveState() {
+				try {
+					localStorage.setItem('st_user', JSON.stringify(this.state.user));
+					localStorage.setItem('st_history', JSON.stringify(this.state.history));
+					localStorage.setItem('st_likedList', JSON.stringify(this.state.likedList));
+					localStorage.setItem('st_downloads', JSON.stringify(this.state.downloads));
+					localStorage.setItem('st_searchHistory', JSON.stringify(this.state.searchHistory));
+					localStorage.setItem('st_settings', JSON.stringify(this.state.settings));
+					localStorage.setItem('st_likesMap', JSON.stringify(this.state.likesMap));
+					localStorage.setItem('st_dailyWatchStats', JSON.stringify(this.state.dailyWatchStats));
+					if (this.state.lastWatched) localStorage.setItem('st_lastWatched', JSON.stringify(this.state.lastWatched));
+				} catch (e) {
+					this.showToast("Penyimpanan lokal penuh, sebagian data tidak tersimpan.");
+				}
+			},
+
+			applySettingsUI() {
+				const s = this.state.settings;
+				this.setTheme(s.theme || 'dark', false);
+				
+				const clampedSize = Math.min(22, Math.max(10, parseInt(s.fontSize) || 14));
+				this.updateFontSize(clampedSize, false);
+				document.getElementById('fontSizeSlider').value = clampedSize;
+
+				const validFont = this.allowedFonts.includes(s.fontFamily) ? s.fontFamily : 'Manrope';
+				this.updateFontFamily(validFont, false);
+
+				const validWeight = ['400', '500', '600', '700'].includes(String(s.fontWeight)) ? String(s.fontWeight) : '400';
+				this.updateFontWeight(validWeight, false);
+
+				this.updateAccentColor(s.accentColor || '#5b9bd5', false);
+				this.setVolume(s.volume !== undefined ? s.volume : 100, false);
+				document.getElementById('volumeSlider').value = s.volume !== undefined ? s.volume : 100;
+				this.setBrightness(s.brightness || 100, false);
+				document.getElementById('brightnessSlider').value = s.brightness || 100;
+				this.setAudioMode(s.audioMode || 'stereo', false);
+				
+				if (s.eqBands) {
+					s.eqBands.forEach((v, idx) => {
+						const el = document.querySelectorAll('.eq-slider')[idx];
+						if (el) el.value = v;
+						const label = document.getElementById(`eqVal${idx}`);
+						if (label) label.innerText = `${v > 0 ? '+' : ''}${v}dB`;
+					});
+					const matchedPreset = this.detectMatchingEqPreset(s.eqBands);
+					this.renderEqPresetDropdown(matchedPreset);
+				} else {
+					this.renderEqPresetDropdown('flat');
+				}
+
+				document.getElementById('soundToggle').checked = !!s.soundEnabled;
+				document.getElementById('hapticToggle').checked = !!s.hapticEnabled;
+				document.getElementById('navAccountName').innerText = this.state.user.name || 'Akun';
+				this.updateAvatarUI();
+				this.updateCoverUI();
+			},
+
+			setTheme(themeName, save = true) {
+				if (save) {
+					this.playSound('theme');
+					this.triggerHaptic();
+				}
+				this.state.settings.theme = themeName;
+				document.body.className = `theme-${themeName} min-h-screen flex flex-col justify-between`;
+
+				['dark', 'slate', 'light'].forEach(t => {
+					const btn = document.getElementById(`btnTheme${t.charAt(0).toUpperCase() + t.slice(1)}`);
+					if (!btn) return;
+					if (t === themeName) {
+						btn.classList.add('border-accent', 'ring-2', 'ring-blue-500/20');
+					} else {
+						btn.classList.remove('border-accent', 'ring-2', 'ring-blue-500/20');
+					}
+				});
+
+				if (save) this.saveState();
+			},
+
+			updateAccentColor(color, save = true) {
+				document.documentElement.style.setProperty('--accent-color', color);
+				document.documentElement.style.setProperty('--accent-hover', color + 'cc');
+				document.documentElement.style.setProperty('--accent-light', color + '22');
+				document.documentElement.style.setProperty('--accent-glow', color + '33');
+				this.state.settings.accentColor = color;
+
+				const hexLabel = document.getElementById('accentHexLabel');
+				if (hexLabel) hexLabel.innerText = color.toUpperCase();
+				
+				document.querySelectorAll('#accentColorPalette .accent-btn').forEach(btn => {
+					const btnColor = btn.getAttribute('data-color');
+					btn.innerHTML = '';
+					btn.classList.remove('ring-2', 'ring-white', 'scale-105');
+					if (btnColor && btnColor.toLowerCase() === color.toLowerCase()) {
+						btn.innerHTML = '<i class="fa-solid fa-check text-white text-xs"></i>';
+						btn.classList.add('ring-2', 'ring-white', 'scale-105');
+					}
+				});
+				if (save) {
+					this.playSound('accent');
+					this.triggerHaptic();
+					this.saveState();
+				}
+			},
+
+			updateFontSize(size, save = true) {
+				const numSize = Math.min(22, Math.max(10, parseInt(size) || 14));
+				document.documentElement.style.setProperty('--base-font-size', numSize + 'px');
+				document.getElementById('fontSizeVal').innerText = numSize + 'px';
+				this.state.settings.fontSize = numSize;
+				if (save) {
+					this.playSound('slider');
+					this.saveState();
+				}
+			},
+
+			updateFontFamily(family, save = true) {
+				document.documentElement.style.setProperty('--app-font-family', `'${family}', sans-serif`);
+				this.state.settings.fontFamily = family;
+				this.renderFontFamilyDropdown(family);
+				if (save) {
+					this.playSound('font_change');
+					this.triggerHaptic();
+					this.saveState();
+				}
+			},
+
+			updateFontWeight(weight, save = true) {
+				const w = parseInt(weight) || 400;
+				const fwMedium = Math.min(800, w + 100);
+				const fwSemibold = Math.min(800, w + 200);
+				const fwBold = Math.min(800, w + 300);
+
+				document.documentElement.style.setProperty('--fw-base', String(w));
+				document.documentElement.style.setProperty('--fw-medium', String(fwMedium));
+				document.documentElement.style.setProperty('--fw-semibold', String(fwSemibold));
+				document.documentElement.style.setProperty('--fw-bold', String(fwBold));
+				this.state.settings.fontWeight = String(w);
+				this.renderFontWeightDropdown(String(w));
+
+				if (save) {
+					this.playSound('font_weight');
+					this.triggerHaptic();
+					this.saveState();
+				}
+			},
+
+			setVolume(val, save = true) {
+				this.state.settings.volume = val;
+				document.getElementById('volumeVal').innerText = `${val}%`;
+				const iframe = document.getElementById('ytPlayer');
+				if (iframe && iframe.contentWindow) {
+					iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [parseInt(val)] }), '*');
+				}
+				if (save) {
+					this.playSound('slider_volume');
+					this.saveState();
+				}
+			},
+
+			setBrightness(val, save = true) {
+				this.state.settings.brightness = val;
+				document.getElementById('brightnessVal').innerText = `${val}%`;
+				document.documentElement.style.setProperty('--player-brightness', `${val}%`);
+				if (save) {
+					this.playSound('slider_brightness');
+					this.saveState();
+				}
+			},
+
+			setAudioMode(mode, save = true) {
+				this.state.settings.audioMode = mode;
+				['stereo', 'mono', 'dolby'].forEach(m => {
+					const btn = document.getElementById(`btnAudio${m.charAt(0).toUpperCase() + m.slice(1)}`);
+					if (btn) {
+						btn.className = (m === mode)
+							? "p-2 border rounded-xl text-center text-xs font-semibold btn-accent transition-all"
+							: "p-2 border rounded-xl text-center text-xs font-semibold ui-card transition-all";
+					}
+				});
+				if (save) {
+					this.playSound('audio_mode');
+					this.triggerHaptic();
+					this.saveState();
+				}
+			},
+
+			updateEqBand(index, val) {
+				val = parseInt(val);
+				this.state.settings.eqBands[index] = val;
+				const label = document.getElementById(`eqVal${index}`);
+				if (label) label.innerText = `${val > 0 ? '+' : ''}${val}dB`;
+				const matchedPreset = this.detectMatchingEqPreset(this.state.settings.eqBands);
+				this.renderEqPresetDropdown(matchedPreset);
+				this.playSound('slider_eq');
+				this.saveState();
+			},
+
+			setEqPreset(preset) {
+				const presetObj = this.eqPresetsData[preset] || this.eqPresetsData.flat;
+				const bands = presetObj.bands;
+				this.state.settings.eqBands = [...bands];
+				bands.forEach((v, idx) => {
+					const el = document.querySelectorAll('.eq-slider')[idx];
+					if (el) el.value = v;
+					const label = document.getElementById(`eqVal${idx}`);
+					if (label) label.innerText = `${v > 0 ? '+' : ''}${v}dB`;
+				});
+				this.renderEqPresetDropdown(preset);
+				this.playSound('eq_preset');
+				this.triggerHaptic();
+				this.saveState();
+			},
+
+			toggleSound(val) {
+				this.state.settings.soundEnabled = val;
+				this.saveState();
+				if (val) this.playSound('toggle_on');
+			},
+
+			toggleHaptic(val) {
+				this.state.settings.hapticEnabled = val;
+				this.saveState();
+				if (val) {
+					this.triggerHaptic();
+					this.playSound('haptic_on');
+				} else {
+					this.playSound('haptic_off');
+				}
+			},
+
+			// =========================================================================
+			// ENHANCED & VARIED WEB AUDIO API SOUND EFFECTS (BOOSTED GAIN + COMPRESSOR)
+			// =========================================================================
+			ensureAudioPipeline() {
+				if (!this.audioCtx) {
+					this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+				}
+				if (this.audioCtx.state === 'suspended') {
+					this.audioCtx.resume();
+				}
+				if (!this.audioCompressor) {
+					this.audioCompressor = this.audioCtx.createDynamicsCompressor();
+					this.audioCompressor.threshold.setValueAtTime(-16, this.audioCtx.currentTime);
+					this.audioCompressor.knee.setValueAtTime(18, this.audioCtx.currentTime);
+					this.audioCompressor.ratio.setValueAtTime(6, this.audioCtx.currentTime);
+					this.audioCompressor.attack.setValueAtTime(0.004, this.audioCtx.currentTime);
+					this.audioCompressor.release.setValueAtTime(0.14, this.audioCtx.currentTime);
+
+					this.audioMasterGain = this.audioCtx.createGain();
+					this.audioMasterGain.gain.setValueAtTime(1.35, this.audioCtx.currentTime);
+
+					this.audioCompressor.connect(this.audioMasterGain);
+					this.audioMasterGain.connect(this.audioCtx.destination);
+				}
+			},
+
+			playSound(type = 'tap', variant = 0) {
+				if (!this.state.settings.soundEnabled) return;
+				if (type === 'slider' || type.indexOf('slider_') === 0) {
+					const nowMs = Date.now();
+					if (nowMs - this.lastSliderSoundTime < 65) return;
+					this.lastSliderSoundTime = nowMs;
+				}
+				try {
+					this.ensureAudioPipeline();
+					const ctx = this.audioCtx;
+					const now = ctx.currentTime;
+
+					const playTone = (freqStart, freqEnd, duration, wave = 'sine', peakGain = 0.115, delay = 0) => {
+						const osc = ctx.createOscillator();
+						const gain = ctx.createGain();
+						osc.type = wave;
+						osc.frequency.setValueAtTime(freqStart, now + delay);
+						if (freqEnd && freqEnd !== freqStart) {
+							osc.frequency.exponentialRampToValueAtTime(freqEnd, now + delay + duration);
+						}
+						gain.gain.setValueAtTime(0.0001, now + delay);
+						gain.gain.linearRampToValueAtTime(peakGain, now + delay + 0.01);
+						gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + duration);
+
+						osc.connect(gain);
+						gain.connect(this.audioCompressor);
+						osc.start(now + delay);
+						osc.stop(now + delay + duration + 0.015);
+					};
+
+					const playNoise = (duration, filterFreq, filterType = 'bandpass', peakGain = 0.07, delay = 0, q = 1) => {
+						const sampleCount = Math.max(1, Math.floor(ctx.sampleRate * duration));
+						const buffer = ctx.createBuffer(1, sampleCount, ctx.sampleRate);
+						const data = buffer.getChannelData(0);
+						for (let i = 0; i < sampleCount; i++) data[i] = Math.random() * 2 - 1;
+
+						const source = ctx.createBufferSource();
+						source.buffer = buffer;
+
+						const filter = ctx.createBiquadFilter();
+						filter.type = filterType;
+						filter.frequency.setValueAtTime(filterFreq, now + delay);
+						filter.Q.setValueAtTime(q, now + delay);
+
+						const gain = ctx.createGain();
+						gain.gain.setValueAtTime(0.0001, now + delay);
+						gain.gain.linearRampToValueAtTime(peakGain, now + delay + 0.006);
+						gain.gain.exponentialRampToValueAtTime(0.0001, now + delay + duration);
+
+						source.connect(filter);
+						filter.connect(gain);
+						gain.connect(this.audioCompressor);
+						source.start(now + delay);
+						source.stop(now + delay + duration + 0.015);
+					};
+
+					switch (type) {
+						case 'play':
+							// Warm ascending two-note major fifth chime
+							playTone(440, 440, 0.09, 'sine', 0.125, 0);
+							playTone(659.25, 659.25, 0.15, 'sine', 0.135, 0.065);
+							break;
+						case 'pause':
+							// Gentle descending two-note pause cadence
+							playTone(587.33, 587.33, 0.085, 'sine', 0.115, 0);
+							playTone(440, 440, 0.13, 'sine', 0.115, 0.06);
+							break;
+						case 'video_select':
+							// Crisp upbeat selection plink for clicking a video card
+							playTone(523.25, 523.25, 0.065, 'triangle', 0.115, 0);
+							playTone(783.99, 783.99, 0.11, 'sine', 0.125, 0.05);
+							break;
+						case 'next':
+							// Energetic forward triple-step skip
+							playTone(523.25, 659.25, 0.055, 'triangle', 0.115, 0);
+							playTone(659.25, 880, 0.08, 'triangle', 0.125, 0.048);
+							break;
+						case 'prev':
+							// Energetic backward double-step skip
+							playTone(659.25, 523.25, 0.055, 'triangle', 0.115, 0);
+							playTone(523.25, 392, 0.08, 'triangle', 0.125, 0.048);
+							break;
+						case 'seek_forward':
+							// Quick upward aerodynamic sweep (+10s)
+							playTone(420, 880, 0.075, 'triangle', 0.12, 0);
+							break;
+						case 'seek_back':
+							// Quick downward aerodynamic sweep (-10s)
+							playTone(780, 360, 0.075, 'triangle', 0.12, 0);
+							break;
+						case 'repeat':
+							// Circular loop 3-note pulse
+							playTone(523.25, 523.25, 0.055, 'sine', 0.105, 0);
+							playTone(659.25, 659.25, 0.055, 'sine', 0.11, 0.05);
+							playTone(523.25, 523.25, 0.075, 'sine', 0.105, 0.10);
+							break;
+						case 'autoplay':
+							// Futuristic automation dual-pulse
+							playTone(493.88, 493.88, 0.06, 'triangle', 0.11, 0);
+							playTone(739.99, 739.99, 0.095, 'sine', 0.12, 0.055);
+							break;
+						case 'category': {
+							// Crisp melodic plink for category pills (pitch follows pill position)
+							const categoryScale = [523.25, 587.33, 659.25, 783.99, 880, 1046.50];
+							const categoryNote = categoryScale[Math.abs(parseInt(variant) || 0) % categoryScale.length];
+							playTone(categoryNote * 0.8, categoryNote, 0.075, 'sine', 0.11, 0);
+							break;
+						}
+						case 'home':
+							// Warm welcoming 3-note home cadence
+							playTone(659.25, 659.25, 0.065, 'sine', 0.11, 0);
+							playTone(523.25, 523.25, 0.065, 'sine', 0.11, 0.055);
+							playTone(392.00, 392.00, 0.12, 'sine', 0.12, 0.11);
+							break;
+						case 'tab':
+							// Light airy pop for switching modal or filter tabs
+							playTone(500, 680, 0.055, 'sine', 0.10, 0);
+							break;
+						case 'dropdown_open':
+							// Smooth rising unfurl tone when opening custom dropdown
+							playTone(390, 650, 0.075, 'sine', 0.105, 0);
+							break;
+						case 'dropdown_close':
+							// Smooth falling settle tone when closing custom dropdown
+							playTone(600, 360, 0.065, 'sine', 0.095, 0);
+							break;
+						case 'font_change':
+							// Crisp typographic crystal double-tap
+							playTone(720, 720, 0.04, 'sine', 0.10, 0);
+							playTone(960, 960, 0.065, 'triangle', 0.11, 0.042);
+							break;
+						case 'audio_mode':
+							// Spatial dual-channel harmonic shift
+							playTone(440, 554.37, 0.07, 'triangle', 0.11, 0);
+							playTone(659.25, 659.25, 0.09, 'sine', 0.115, 0.05);
+							break;
+						case 'eq_preset':
+							// 3-band harmonic sweep for EQ preset selection
+							playTone(330, 330, 0.05, 'triangle', 0.10, 0);
+							playTone(493.88, 493.88, 0.05, 'triangle', 0.105, 0.042);
+							playTone(739.99, 739.99, 0.085, 'sine', 0.115, 0.084);
+							break;
+						case 'like':
+							// Bright uplifting 4-note chord arpeggio
+							playTone(523.25, 523.25, 0.07, 'sine', 0.11, 0);
+							playTone(659.25, 659.25, 0.07, 'sine', 0.11, 0.042);
+							playTone(783.99, 783.99, 0.08, 'sine', 0.12, 0.084);
+							playTone(1046.50, 1046.50, 0.14, 'sine', 0.13, 0.126);
+							break;
+						case 'unlike':
+							// Soft muted downward release
+							playTone(440, 311.13, 0.085, 'sine', 0.095, 0);
+							break;
+						case 'modal_open':
+							// Soft rising harmonic swell
+							playTone(320, 580, 0.115, 'sine', 0.105, 0);
+							break;
+						case 'modal_close':
+							// Soft falling settle
+							playTone(540, 300, 0.105, 'sine', 0.095, 0);
+							break;
+						case 'theme':
+							// Resonant dual-harmonic shimmer for theme mode
+							playTone(440, 554.37, 0.095, 'sine', 0.10, 0);
+							playTone(659.25, 830.61, 0.115, 'sine', 0.095, 0.038);
+							break;
+						case 'accent':
+							// Sparkling high-tone trio for accent color swatch
+							playTone(587.33, 587.33, 0.055, 'sine', 0.095, 0);
+							playTone(880, 880, 0.065, 'sine', 0.105, 0.04);
+							playTone(1174.66, 1174.66, 0.09, 'sine', 0.11, 0.08);
+							break;
+						case 'toggle_on':
+							// Positive ascending switch snap
+							playTone(480, 780, 0.055, 'triangle', 0.115, 0);
+							break;
+						case 'toggle_off':
+							// Calm descending switch snap
+							playTone(700, 410, 0.055, 'triangle', 0.105, 0);
+							break;
+						case 'slider':
+							// Crisp tactile micro-tick while dragging range sliders
+							playTone(820, 720, 0.028, 'sine', 0.068, 0);
+							break;
+						case 'search':
+							// Expressive discovery ping
+							playTone(560, 920, 0.085, 'sine', 0.115, 0);
+							break;
+						case 'download':
+							// Encouraging rising triple cascade
+							playTone(440, 440, 0.065, 'sine', 0.11, 0);
+							playTone(554.37, 554.37, 0.065, 'sine', 0.115, 0.05);
+							playTone(880, 880, 0.14, 'sine', 0.13, 0.10);
+							break;
+						case 'copy':
+							// Sharp clipboard double-tick
+							playTone(760, 760, 0.045, 'sine', 0.10, 0);
+							playTone(1046.50, 1046.50, 0.065, 'sine', 0.11, 0.045);
+							break;
+						case 'delete':
+							// Distinct low sweep down for clearing history
+							playTone(410, 195, 0.095, 'triangle', 0.11, 0);
+							break;
+						case 'expand':
+							// Gentle accordion lift
+							playTone(420, 580, 0.065, 'sine', 0.095, 0);
+							break;
+						case 'collapse':
+							// Gentle accordion fold
+							playTone(580, 420, 0.065, 'sine', 0.095, 0);
+							break;
+						case 'upload':
+							// Progressive uplifting triad on avatar/cover upload
+							playTone(440, 440, 0.06, 'sine', 0.11, 0);
+							playTone(659.25, 659.25, 0.06, 'sine', 0.115, 0.05);
+							playTone(880, 880, 0.12, 'sine', 0.125, 0.10);
+							break;
+						case 'success':
+							// Pleasant confirmation double chime
+							playTone(587.33, 587.33, 0.08, 'sine', 0.115, 0);
+							playTone(880, 880, 0.15, 'sine', 0.125, 0.065);
+							break;
+						case 'error':
+							// Polite low dual warning tone
+							playTone(230, 185, 0.11, 'sawtooth', 0.08, 0);
+							playTone(195, 160, 0.12, 'sawtooth', 0.075, 0.09);
+							break;
+						case 'repeat_off':
+							// Soft descending release when repeat is switched off
+							playTone(659.25, 440, 0.07, 'sine', 0.10, 0);
+							playTone(440, 330, 0.09, 'sine', 0.095, 0.055);
+							break;
+						case 'repeat_one':
+							// Single bell ping with octave shimmer for repeat-one
+							playTone(698.46, 698.46, 0.07, 'triangle', 0.115, 0);
+							playTone(1396.91, 1396.91, 0.11, 'sine', 0.07, 0.02);
+							break;
+						case 'repeat_all':
+							// Rising four-step loop for repeat-all
+							playTone(523.25, 523.25, 0.045, 'triangle', 0.105, 0);
+							playTone(659.25, 659.25, 0.045, 'triangle', 0.108, 0.04);
+							playTone(783.99, 783.99, 0.045, 'triangle', 0.112, 0.08);
+							playTone(1046.50, 1046.50, 0.09, 'sine', 0.12, 0.12);
+							break;
+						case 'autoplay_on':
+							// Futuristic power-up for autoplay on
+							playTone(493.88, 493.88, 0.06, 'triangle', 0.11, 0);
+							playTone(739.99, 987.77, 0.10, 'sine', 0.12, 0.055);
+							break;
+						case 'autoplay_off':
+							// Power-down sweep for autoplay off
+							playTone(739.99, 739.99, 0.06, 'triangle', 0.105, 0);
+							playTone(493.88, 349.23, 0.10, 'sine', 0.105, 0.055);
+							break;
+						case 'share':
+							// Airy whoosh with a rising send tone
+							playNoise(0.14, 2600, 'bandpass', 0.07, 0, 2.5);
+							playTone(660, 990, 0.10, 'triangle', 0.10, 0.03);
+							playTone(990, 1320, 0.09, 'sine', 0.09, 0.10);
+							break;
+						case 'theater_on':
+							// Curtain-opening swell for cinema mode
+							playTone(220, 330, 0.14, 'sawtooth', 0.04, 0);
+							playTone(330, 495, 0.16, 'triangle', 0.09, 0.05);
+							playTone(495, 660, 0.12, 'sine', 0.10, 0.12);
+							break;
+						case 'theater_off':
+							// Curtain-closing fall for cinema mode
+							playTone(660, 440, 0.12, 'triangle', 0.095, 0);
+							playTone(440, 247, 0.16, 'sine', 0.095, 0.06);
+							break;
+						case 'haptic_on':
+							// Buzzy double pulse that ends in a bright tick
+							playTone(180, 180, 0.04, 'square', 0.05, 0);
+							playTone(240, 240, 0.04, 'square', 0.05, 0.05);
+							playTone(360, 360, 0.06, 'triangle', 0.09, 0.10);
+							break;
+						case 'haptic_off':
+							// Short buzz that fades away
+							playTone(300, 300, 0.04, 'square', 0.045, 0);
+							playTone(200, 160, 0.07, 'triangle', 0.09, 0.05);
+							break;
+						case 'clear_all':
+							// Sweeping wipe for clearing the whole history
+							playNoise(0.16, 900, 'lowpass', 0.09, 0, 0.8);
+							playTone(520, 140, 0.18, 'triangle', 0.10, 0);
+							break;
+						case 'upload_cover':
+							// Wide four-step cascade for cover upload
+							playTone(392, 392, 0.06, 'sine', 0.11, 0);
+							playTone(523.25, 523.25, 0.06, 'sine', 0.115, 0.05);
+							playTone(659.25, 659.25, 0.06, 'sine', 0.12, 0.10);
+							playTone(1046.50, 1046.50, 0.14, 'triangle', 0.12, 0.15);
+							break;
+						case 'edit':
+							// Pencil scratch for editing the profile name
+							playNoise(0.05, 4200, 'highpass', 0.05, 0, 0.7);
+							playTone(880, 1175, 0.05, 'triangle', 0.09, 0.02);
+							break;
+						case 'save':
+							// Confident save chime
+							playTone(698.46, 698.46, 0.05, 'triangle', 0.11, 0);
+							playTone(1046.50, 1046.50, 0.13, 'sine', 0.125, 0.05);
+							break;
+						case 'export':
+							// Outgoing data swoosh
+							playTone(392, 392, 0.05, 'sine', 0.105, 0);
+							playTone(587.33, 880, 0.09, 'triangle', 0.115, 0.05);
+							playNoise(0.10, 3000, 'bandpass', 0.04, 0.05, 2);
+							break;
+						case 'import':
+							// Incoming data drop
+							playTone(880, 587.33, 0.09, 'triangle', 0.115, 0);
+							playTone(440, 440, 0.10, 'sine', 0.115, 0.07);
+							break;
+						case 'import_done':
+							// Four-note completion sparkle
+							playTone(440, 440, 0.05, 'sine', 0.10, 0);
+							playTone(659.25, 659.25, 0.05, 'sine', 0.105, 0.045);
+							playTone(880, 880, 0.05, 'sine', 0.11, 0.09);
+							playTone(1318.51, 1318.51, 0.13, 'triangle', 0.115, 0.135);
+							break;
+						case 'acc_watch':
+							// History tab
+							playTone(440, 587.33, 0.06, 'triangle', 0.10, 0);
+							break;
+						case 'acc_like':
+							// Liked tab
+							playTone(659.25, 880, 0.05, 'sine', 0.10, 0);
+							playTone(880, 1108.73, 0.06, 'sine', 0.095, 0.04);
+							break;
+						case 'acc_download':
+							// Download tab
+							playTone(523.25, 392, 0.06, 'triangle', 0.10, 0);
+							playTone(392, 330, 0.06, 'sine', 0.095, 0.04);
+							break;
+						case 'settings_open':
+							// Mechanical rising unlock for the settings panel
+							playTone(260, 520, 0.12, 'triangle', 0.10, 0);
+							playTone(520, 780, 0.10, 'sine', 0.095, 0.06);
+							break;
+						case 'settings_close':
+							// Mechanical falling lock for the settings panel
+							playTone(700, 350, 0.11, 'triangle', 0.095, 0);
+							playTone(350, 260, 0.09, 'sine', 0.09, 0.06);
+							break;
+						case 'slider_volume':
+							// Warm low tick for the volume slider
+							playTone(440, 470, 0.03, 'triangle', 0.07, 0);
+							break;
+						case 'slider_brightness':
+							// Bright high tick for the brightness slider
+							playTone(1040, 1120, 0.03, 'sine', 0.06, 0);
+							break;
+						case 'slider_eq':
+							// Double click for the equalizer bands
+							playTone(560, 520, 0.03, 'square', 0.04, 0);
+							playTone(840, 800, 0.02, 'sine', 0.045, 0.02);
+							break;
+						case 'font_weight':
+							// Low thump with a crisp tick for font weight
+							playTone(260, 200, 0.06, 'triangle', 0.11, 0);
+							playTone(780, 780, 0.05, 'sine', 0.095, 0.045);
+							break;
+						case 'download_audio':
+							// Brighter four-step cascade for MP3 downloads
+							playTone(659.25, 659.25, 0.06, 'sine', 0.11, 0);
+							playTone(830.61, 830.61, 0.06, 'sine', 0.115, 0.05);
+							playTone(987.77, 987.77, 0.06, 'triangle', 0.12, 0.10);
+							playTone(1318.51, 1318.51, 0.12, 'sine', 0.12, 0.15);
+							break;
+						case 'scroll':
+							// Soft swipe for the category scroll arrows
+							playNoise(0.07, 3200, 'bandpass', 0.05, 0, 1.5);
+							playTone(700, 900, 0.04, 'sine', 0.06, 0.01);
+							break;
+						case 'tap':
+						default:
+							// Clean tactile click
+							playTone(520, 320, 0.048, 'sine', 0.105, 0);
+							break;
+					}
+				} catch (e) {}
+			},
+
+			// STRICT 100ms HAPTIC FEEDBACK
+			triggerHaptic() {
+				if (!this.state.settings.hapticEnabled) return;
+				try {
+					if ('vibrate' in navigator) navigator.vibrate(100);
+				} catch (e) {}
+			},
+
+			showToast(msg) {
+				const toast = document.getElementById('toast');
+				document.getElementById('toastMsg').innerText = msg;
+				toast.classList.remove('opacity-0', 'pointer-events-none');
+				toast.classList.add('toast-visible');
+				clearTimeout(this.toastTimeout);
+				this.toastTimeout = setTimeout(() => {
+					toast.classList.remove('toast-visible');
+					toast.classList.add('opacity-0', 'pointer-events-none');
+				}, 3000);
+			},
+
+			formatNumber(num) {
+				if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+				if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+				return num;
+			},
+
+			parseIsoDuration(iso) {
+				if (!iso) return '--:--';
+				const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+				if (!m) return '--:--';
+				const h = parseInt(m[1] || 0);
+				const min = parseInt(m[2] || 0);
+				const s = parseInt(m[3] || 0);
+				const pad = n => String(n).padStart(2, '0');
+				return h > 0 ? `${h}:${pad(min)}:${pad(s)}` : `${pad(min)}:${pad(s)}`;
+			},
+
+			formatSeconds(sec) {
+				if (isNaN(sec)) return '--:--';
+				const h = Math.floor(sec / 3600);
+				const m = Math.floor((sec % 3600) / 60);
+				const s = Math.floor(sec % 60);
+				const pad = n => String(n).padStart(2, '0');
+				return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+			}
+		};
+
+		window.onload = () => app.init();
+	</script>
+	
+	<script>
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', () => {
+				navigator.serviceWorker.register('streamtube.js')
+					.then((registration) => {
+						console.log('ServiceWorker sukses didaftarkan dengan scope: ', registration.scope);
+					})
+					.catch((error) => {
+						console.log('Pendaftaran ServiceWorker gagal: ', error);
+					});
+			});
+		}
+	</script>
+</body>
+</html>
