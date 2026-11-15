@@ -1,0 +1,24 @@
+{
+	"name": "Streamtube",
+	"short_name": "Streamtube",
+	"description": "Custom YouTube Player & Streamer",
+	"start_url": "../streamtube.html",
+	"display": "standalone",
+	"orientation": "portrait",
+	"background_color": "#060b16",
+	"theme_color": "#060b16",
+	"icons": [
+		{
+			"src": "logo.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any maskable"
+		},
+		{
+			"src": "logo.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any maskable"
+		}
+	]
+}
